@@ -949,3 +949,230 @@ button {
         font-size: 1rem;
     }
 }
+
+/* Featured App Section */
+.featured-app {
+    padding: 6rem 0;
+    background-color: var(--bg-secondary);
+}
+
+.app-showcase {
+    background-color: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: 1.5rem;
+    padding: 3rem;
+    box-shadow: var(--card-shadow);
+}
+
+.app-preview {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.app-preview-card {
+    background-color: var(--bg-tertiary);
+    border-radius: 1rem;
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+    transition: all 0.3s ease;
+}
+
+.app-preview-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--card-hover-shadow);
+}
+
+.app-preview-card i {
+    font-size: 2rem;
+    background: var(--accent-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.app-preview-card span {
+    font-weight: 600;
+    color: var(--text-secondary);
+}
+
+.app-features {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.app-feature {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    color: var(--text-secondary);
+}
+
+.app-feature i {
+    color: #22c55e;
+    font-size: 1.25rem;
+}
+
+.app-showcase .btn {
+    display: inline-flex;
+    justify-content: center;
+    width: 100%;
+    max-width: 300px;
+    margin: 0 auto;
+}
+
+/* Upcoming Apps Section */
+.upcoming-apps {
+    padding: 6rem 0;
+}
+
+.upcoming-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+}
+
+.upcoming-card {
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 1.5rem;
+    padding: 2rem;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.upcoming-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--card-hover-shadow);
+    border-color: var(--accent-primary);
+}
+
+.upcoming-icon {
+    width: 60px;
+    height: 60px;
+    background: var(--accent-gradient);
+    border-radius: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1.5rem;
+}
+
+.upcoming-icon i {
+    font-size: 1.5rem;
+    color: white;
+}
+
+.upcoming-card h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.upcoming-card p {
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    line-height: 1.6;
+}
+
+.status-badge {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 1rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    margin-top: 1rem;
+}
+
+.status-soon {
+    background-color: rgba(34, 197, 94, 0.1);
+    color: #22c55e;
+}
+
+.status-planned {
+    background-color: rgba(99, 102, 241, 0.1);
+    color: var(--accent-primary);
+}
+
+/* Theme Toggle Footer */
+.theme-toggle-footer {
+    position: relative;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: var(--bg-tertiary);
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    margin-left: auto;
+}
+
+.theme-toggle-footer:hover {
+    background-color: var(--accent-primary);
+    color: white;
+}
+
+.theme-toggle-footer i {
+    position: absolute;
+    transition: all 0.3s ease;
+}
+
+.theme-toggle-footer .fa-sun {
+    opacity: 0;
+    transform: rotate(90deg);
+}
+
+[data-theme="dark"] .theme-toggle-footer .fa-moon {
+    opacity: 0;
+    transform: rotate(-90deg);
+}
+
+[data-theme="dark"] .theme-toggle-footer .fa-sun {
+    opacity: 1;
+    transform: rotate(0);
+}
+
+/* Responsive for new sections */
+@media (max-width: 1024px) {
+    .app-preview {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .upcoming-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .app-showcase {
+        padding: 2rem;
+    }
+
+    .app-preview {
+        grid-template-columns: 1fr;
+    }
+
+    .app-features {
+        grid-template-columns: 1fr;
+    }
+
+    .upcoming-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .footer-bottom {
+        flex-wrap: wrap;
+    }
+
+    .theme-toggle-footer {
+        margin: 1rem auto 0;
+    }
+}
