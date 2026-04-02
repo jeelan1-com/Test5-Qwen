@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Documentation - NexusHub</title>
+    <link rel="stylesheet" href="../styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .docs-page {
+            padding-top: 100px;
+            min-height: 100vh;
+            background: var(--bg-secondary);
+        }
+
+        .docs-header {
+            text-align: center;
+            padding: 4rem 2rem;
+            background: var(--accent-gradient);
+            margin-bottom: 3rem;
+        }
+
+        .docs-header h1 {
+            font-size: 3rem;
+            color: white;
+            margin-bottom: 1rem;
+        }
+
+        .docs-header p {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 1.25rem;
+        }
+
+        .docs-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            gap: 3rem;
+        }
+
+        .docs-sidebar {
+            position: sticky;
+            top: 120px;
+            height: fit-content;
+        }
+
+        .docs-nav {
+            background: var(--bg-primary);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            border: 1px solid var(--border-color);
+        }
+
+        .docs-nav h3 {
+            font-size: 0.875rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-muted);
+            margin-bottom: 1rem;
+        }
+
+        .docs-nav ul {
+            list-style: none;
+        }
+
+        .docs-nav li {
+            margin-bottom: 0.5rem;
+        }
+
+        .docs-nav a {
+            display: block;
+            padding: 0.75rem 1rem;
+            border-radius: 0.5rem;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            transition: all 0.2s ease;
+        }
+
+        .docs-nav a:hover,
+        .docs-nav a.active {
+            background: var(--bg-tertiary);
+            color: var(--accent-primary);
+        }
+
+        .docs-content {
+            background: var(--bg-primary);
+            border-radius: 1.5rem;
+            padding: 3rem;
+            border: 1px solid var(--border-color);
+        }
+
+        .docs-content h2 {
+            font-size: 2rem;
+            margin-bottom: 1.5rem;
+            color: var(--text-primary);
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .docs-content h3 {
+            font-size: 1.5rem;
+            margin: 2rem 0 1rem;
+            color: var(--text-primary);
+        }
+
+        .docs-content p {
+            color: var(--text-secondary);
+            line-height: 1.8;
+            margin-bottom: 1rem;
+        }
+
+        .docs-content ul,
+        .docs-content ol {
+            color: var(--text-secondary);
+            line-height: 1.8;
+            margin-bottom: 1rem;
+            padding-left: 1.5rem;
+        }
+
+        .docs-content li {
+            margin-bottom: 0.5rem;
+        }
+
+        .code-block {
+            background: var(--bg-tertiary);
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            overflow-x: auto;
+            margin: 1.5rem 0;
+            border: 1px solid var(--border-color);
+        }
+
+        .code-block code {
+            font-family: 'Fira Code', 'Consolas', monospace;
+            font-size: 0.875rem;
+            color: var(--text-primary);
+        }
+
+        .info-box {
+            background: var(--bg-tertiary);
+            border-left: 4px solid var(--accent-primary);
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+        }
+
+        .info-box.warning {
+            border-left-color: #f59e0b;
+        }
+
+        .info-box.success {
+            border-left-color: #22c55e;
+        }
+
+        .info-box h4 {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.75rem;
+            color: var(--text-primary);
+        }
+
+        .feature-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 1rem;
+            background: var(--bg-tertiary);
+            border-radius: 0.75rem;
+        }
+
+        .feature-item i {
+            color: #22c55e;
+            font-size: 1.25rem;
+        }
+
+        @media (max-width: 900px) {
+            .docs-container {
+                grid-template-columns: 1fr;
+            }
+
+            .docs-sidebar {
+                position: static;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="../index.html" class="logo">
+                <i class="fas fa-cube"></i>
+                <span>NexusHub</span>
+            </a>
+            <ul class="nav-menu">
+                <li><a href="../index.html">Home</a></li>
+                <li><a href="apps.html">Apps</a></li>
+                <li><a href="news.html">News</a></li>
+                <li><a href="about.html">About</a></li>
+                <li><a href="docs.html">Docs</a></li>
+                <li><a href="contact.html">Contact</a></li>
+            </ul>
+            <div class="nav-actions">
+                <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+                    <i class="fas fa-moon"></i>
+                    <i class="fas fa-sun"></i>
+                </button>
+            </div>
+            <button class="mobile-menu-btn" id="mobileMenuBtn">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Docs Header -->
+    <section class="docs-header">
+        <h1>Documentation</h1>
+        <p>Everything you need to know about using NexusHub</p>
+    </section>
+
+    <!-- Docs Container -->
+    <div class="docs-container">
+        <!-- Sidebar -->
+        <aside class="docs-sidebar">
+            <nav class="docs-nav">
+                <h3>Getting Started</h3>
+                <ul>
+                    <li><a href="#introduction" class="active">Introduction</a></li>
+                    <li><a href="#quick-start">Quick Start</a></li>
+                    <li><a href="#features">Features Overview</a></li>
+                </ul>
+                <h3>Apps</h3>
+                <ul>
+                    <li><a href="#whiteboard">Whiteboard App</a></li>
+                    <li><a href="#shortcuts">Keyboard Shortcuts</a></li>
+                </ul>
+                <h3>Support</h3>
+                <ul>
+                    <li><a href="#faq">FAQ</a></li>
+                    <li><a href="#troubleshooting">Troubleshooting</a></li>
+                    <li><a href="#contact">Contact Support</a></li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- Content -->
+        <main class="docs-content">
+            <section id="introduction">
+                <h2>Introduction</h2>
+                <p>Welcome to NexusHub documentation! NexusHub is a modern web platform that brings together essential productivity tools in one beautiful, cohesive interface. All our applications run entirely in your browser, requiring no installation or account creation.</p>
+                
+                <div class="info-box success">
+                    <h4><i class="fas fa-check-circle"></i> No Account Required</h4>
+                    <p>All basic features are available immediately without signing up. Your data stays on your device.</p>
+                </div>
+            </section>
+
+            <section id="quick-start">
+                <h2>Quick Start</h2>
+                <p>Getting started with NexusHub is simple:</p>
+                <ol>
+                    <li>Browse to our <a href="apps.html" style="color: var(--accent-primary);">Apps page</a></li>
+                    <li>Click on any available app to launch it</li>
+                    <li>Start using the app immediately - no setup required!</li>
+                    <li>Use the theme toggle to switch between light and dark mode</li>
+                </ol>
+            </section>
+
+            <section id="features">
+                <h2>Features Overview</h2>
+                <div class="feature-list">
+                    <div class="feature-item">
+                        <i class="fas fa-check"></i>
+                        <span>Fully offline capable</span>
+                    </div>
+                    <div class="feature-item">
+                        <i class="fas fa-check"></i>
+                        <span>Dark & Light themes</span>
+                    </div>
+                    <div class="feature-item">
+                        <i class="fas fa-check"></i>
+                        <span>Responsive design</span>
+                    </div>
+                    <div class="feature-item">
+                        <i class="fas fa-check"></i>
+                        <span>Touch support</span>
+                    </div>
+                    <div class="feature-item">
+                        <i class="fas fa-check"></i>
+                        <span>Export capabilities</span>
+                    </div>
+                    <div class="feature-item">
+                        <i class="fas fa-check"></i>
+                        <span>Keyboard shortcuts</span>
+                    </div>
+                </div>
+            </section>
+
+            <section id="whiteboard">
+                <h2>Whiteboard App</h2>
+                <p>The Whiteboard app is our GoodNotes-style digital canvas for notes, sketches, and annotations.</p>
+                
+                <h3>Tools Available</h3>
+                <ul>
+                    <li><strong>Pen:</strong> Draw with precise lines in various colors</li>
+                    <li><strong>Highlighter:</strong> Semi-transparent highlighting tool</li>
+                    <li><strong>Eraser:</strong> Remove unwanted marks</li>
+                </ul>
+
+                <h3>Multiple Pages</h3>
+                <p>Create multiple pages using the "+" button in the pages panel. Click on any thumbnail to switch between pages.</p>
+
+                <h3>Import & Export</h3>
+                <p>Import PDF files to annotate them, or export your work as PNG or PDF format.</p>
+
+                <div class="info-box">
+                    <h4><i class="fas fa-info-circle"></i> Tip</h4>
+                    <p>For best PDF import results, use PDFs with simple layouts. Complex PDFs may require additional processing.</p>
+                </div>
+            </section>
+
+            <section id="shortcuts">
+                <h2>Keyboard Shortcuts</h2>
+                <div class="code-block">
+                    <code>
+Ctrl/Cmd + Z  → Undo<br>
+Ctrl/Cmd + Shift + Z  → Redo
+                    </code>
+                </div>
+            </section>
+
+            <section id="faq">
+                <h2>FAQ</h2>
+                
+                <h3>Is my data saved?</h3>
+                <p>Currently, drawings are not automatically saved. Make sure to export your work before closing the browser tab.</p>
+
+                <h3>Can I use NexusHub offline?</h3>
+                <p>Yes! Once the page loads, all apps work completely offline without requiring an internet connection.</p>
+
+                <h3>Which browsers are supported?</h3>
+                <p>NexusHub works best on modern browsers including Chrome, Firefox, Safari, and Edge.</p>
+            </section>
+
+            <section id="troubleshooting">
+                <h2>Troubleshooting</h2>
+                
+                <h3>App not loading?</h3>
+                <p>Try refreshing the page or clearing your browser cache.</p>
+
+                <h3>Drawing feels laggy?</h3>
+                <p>Close other browser tabs to free up memory. Large canvas sizes may impact performance on older devices.</p>
+
+                <div class="info-box warning">
+                    <h4><i class="fas fa-exclamation-triangle"></i> Known Issue</h4>
+                    <p>PDF import requires pdf.js library for full functionality. Currently shows a placeholder message.</p>
+                </div>
+            </section>
+
+            <section id="contact">
+                <h2>Contact Support</h2>
+                <p>Need help? Have suggestions? We'd love to hear from you!</p>
+                <p>Visit our <a href="contact.html" style="color: var(--accent-primary);">Contact page</a> to get in touch.</p>
+            </section>
+        </main>
+    </div>
+
+    <script src="../script.js"></script>
+</body>
+</html>
