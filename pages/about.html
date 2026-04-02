@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About - NexusHub</title>
+    <link rel="stylesheet" href="../styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .about-page {
+            padding-top: 100px;
+            min-height: 100vh;
+            background: var(--bg-secondary);
+        }
+
+        .about-header {
+            text-align: center;
+            padding: 4rem 2rem;
+            background: var(--accent-gradient);
+            margin-bottom: 3rem;
+        }
+
+        .about-header h1 {
+            font-size: 3rem;
+            color: white;
+            margin-bottom: 1rem;
+        }
+
+        .about-header p {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 1.25rem;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .about-content {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .about-section {
+            background: var(--bg-primary);
+            border-radius: 1.5rem;
+            padding: 3rem;
+            margin-bottom: 2rem;
+            border: 1px solid var(--border-color);
+        }
+
+        .about-section h2 {
+            font-size: 2rem;
+            margin-bottom: 1.5rem;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .about-section h2 i {
+            background: var(--accent-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .about-section p {
+            color: var(--text-secondary);
+            line-height: 1.8;
+            margin-bottom: 1rem;
+        }
+
+        .values-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .value-card {
+            background: var(--bg-tertiary);
+            padding: 2rem;
+            border-radius: 1rem;
+            text-align: center;
+        }
+
+        .value-card i {
+            font-size: 2.5rem;
+            background: var(--accent-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 1rem;
+        }
+
+        .value-card h3 {
+            font-size: 1.25rem;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+        }
+
+        .value-card p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 2rem;
+            background: var(--bg-tertiary);
+            border-radius: 1rem;
+        }
+
+        .stat-number {
+            font-size: 3rem;
+            font-weight: 700;
+            background: var(--accent-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            display: block;
+        }
+
+        .stat-label {
+            color: var(--text-secondary);
+            margin-top: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="../index.html" class="logo">
+                <i class="fas fa-cube"></i>
+                <span>NexusHub</span>
+            </a>
+            <ul class="nav-menu">
+                <li><a href="../index.html">Home</a></li>
+                <li><a href="apps.html">Apps</a></li>
+                <li><a href="news.html">News</a></li>
+                <li><a href="about.html">About</a></li>
+                <li><a href="docs.html">Docs</a></li>
+                <li><a href="contact.html">Contact</a></li>
+            </ul>
+            <div class="nav-actions">
+                <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+                    <i class="fas fa-moon"></i>
+                    <i class="fas fa-sun"></i>
+                </button>
+            </div>
+            <button class="mobile-menu-btn" id="mobileMenuBtn">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+    </nav>
+
+    <!-- About Header -->
+    <section class="about-header">
+        <h1>About NexusHub</h1>
+        <p>Building the future of web applications with a focus on simplicity, privacy, and user experience</p>
+    </section>
+
+    <!-- About Content -->
+    <div class="about-content">
+        <!-- Mission Section -->
+        <div class="about-section">
+            <h2><i class="fas fa-bullseye"></i> Our Mission</h2>
+            <p>NexusHub was created with a simple yet powerful mission: to bring together essential tools and applications in one beautiful, cohesive platform. We believe that productivity software should be accessible, intuitive, and respectful of your privacy.</p>
+            <p>Our platform is built entirely with modern web technologies, running completely in your browser without requiring any installations or accounts for basic features. This means faster access to your tools and complete control over your data.</p>
+        </div>
+
+        <!-- Story Section -->
+        <div class="about-section">
+            <h2><i class="fas fa-book-open"></i> Our Story</h2>
+            <p>NexusHub started as a vision to create a unified digital workspace that combines the best aspects of native applications with the accessibility of the web. Inspired by macOS design principles, we've crafted an interface that feels familiar yet refreshingly modern.</p>
+            <p>Every app in our ecosystem is designed from the ground up to work seamlessly together, sharing a common design language and user experience philosophy. Whether you're taking notes on our Whiteboard, managing tasks, or collaborating in real-time, everything just works.</p>
+        </div>
+
+        <!-- Values Section -->
+        <div class="about-section">
+            <h2><i class="fas fa-heart"></i> Our Values</h2>
+            <div class="values-grid">
+                <div class="value-card">
+                    <i class="fas fa-user-shield"></i>
+                    <h3>Privacy First</h3>
+                    <p>Your data stays on your device. No tracking, no selling, no compromises.</p>
+                </div>
+                <div class="value-card">
+                    <i class="fas fa-paint-brush"></i>
+                    <h3>Beautiful Design</h3>
+                    <p>Every pixel matters. We craft interfaces that are both functional and delightful.</p>
+                </div>
+                <div class="value-card">
+                    <i class="fas fa-bolt"></i>
+                    <h3>Performance</h3>
+                    <p>Fast, responsive, and efficient. No bloat, just pure functionality.</p>
+                </div>
+                <div class="value-card">
+                    <i class="fas fa-globe"></i>
+                    <h3>Accessibility</h3>
+                    <p>Tools that work for everyone, everywhere, on any device.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stats Section -->
+        <div class="about-section">
+            <h2><i class="fas fa-chart-line"></i> By The Numbers</h2>
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <span class="stat-number">10+</span>
+                    <span class="stat-label">Apps Planned</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">1</span>
+                    <span class="stat-label">Apps Launched</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">100%</span>
+                    <span class="stat-label">Browser-Based</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">0</span>
+                    <span class="stat-label">Account Required</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Contact CTA -->
+        <div class="about-section" style="text-align: center;">
+            <h2><i class="fas fa-envelope"></i> Get In Touch</h2>
+            <p>We'd love to hear from you! Whether you have feedback, suggestions, or just want to say hello, feel free to reach out.</p>
+            <a href="contact.html" class="btn btn-primary" style="display: inline-flex; align-items: center; gap: 0.5rem; margin-top: 1.5rem;">
+                <i class="fas fa-paper-plane"></i>
+                Contact Us
+            </a>
+        </div>
+    </div>
+
+    <script src="../script.js"></script>
+</body>
+</html>
