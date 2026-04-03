@@ -16,19 +16,38 @@
 
         .about-header {
             text-align: center;
-            padding: 4rem 2rem;
+            padding: 5rem 2rem 4rem;
+            background: transparent;
+            margin-bottom: 2rem;
+            position: relative;
+        }
+
+        .about-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
             background: var(--accent-gradient);
-            margin-bottom: 3rem;
+            opacity: 0.1;
+            border-radius: 2rem;
+            z-index: -1;
         }
 
         .about-header h1 {
-            font-size: 3rem;
-            color: white;
+            font-size: 3.5rem;
+            font-weight: 800;
+            background: var(--accent-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
             margin-bottom: 1rem;
+            letter-spacing: -0.02em;
         }
 
         .about-header p {
-            color: rgba(255, 255, 255, 0.9);
+            color: var(--text-secondary);
             font-size: 1.25rem;
             max-width: 700px;
             margin: 0 auto;
@@ -42,14 +61,40 @@
 
         .about-section {
             background: var(--bg-primary);
+            backdrop-filter: blur(20px);
             border-radius: 1.5rem;
             padding: 3rem;
             margin-bottom: 2rem;
             border: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .about-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--accent-gradient);
+            transform: scaleX(0);
+            transition: transform 0.4s ease;
+        }
+
+        .about-section:hover {
+            box-shadow: var(--card-hover-shadow);
+            border-color: var(--accent-primary);
+        }
+
+        .about-section:hover::before {
+            transform: scaleX(1);
         }
 
         .about-section h2 {
             font-size: 2rem;
+            font-weight: 700;
             margin-bottom: 1.5rem;
             color: var(--text-primary);
             display: flex;
@@ -62,75 +107,106 @@
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
+            font-size: 2.25rem;
         }
 
         .about-section p {
             color: var(--text-secondary);
-            line-height: 1.8;
-            margin-bottom: 1rem;
+            line-height: 1.9;
+            margin-bottom: 1.25rem;
+            font-size: 1.05rem;
         }
 
         .values-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
             gap: 2rem;
-            margin-top: 2rem;
+            margin-top: 2.5rem;
         }
 
         .value-card {
             background: var(--bg-tertiary);
-            padding: 2rem;
-            border-radius: 1rem;
+            padding: 2.5rem 2rem;
+            border-radius: 1.25rem;
             text-align: center;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid var(--border-color);
+        }
+
+        .value-card:hover {
+            transform: translateY(-8px);
+            box-shadow: var(--card-hover-shadow);
+            border-color: var(--accent-primary);
         }
 
         .value-card i {
-            font-size: 2.5rem;
+            font-size: 3rem;
             background: var(--accent-gradient);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-            margin-bottom: 1rem;
+            margin-bottom: 1.25rem;
+            display: inline-block;
         }
 
         .value-card h3 {
             font-size: 1.25rem;
-            margin-bottom: 0.5rem;
+            font-weight: 700;
+            margin-bottom: 0.75rem;
             color: var(--text-primary);
         }
 
         .value-card p {
             color: var(--text-secondary);
-            font-size: 0.9rem;
+            font-size: 0.95rem;
+            line-height: 1.7;
         }
 
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
             gap: 2rem;
-            margin-top: 2rem;
+            margin-top: 2.5rem;
         }
 
         .stat-item {
             text-align: center;
             padding: 2rem;
             background: var(--bg-tertiary);
-            border-radius: 1rem;
+            border-radius: 1.25rem;
+            border: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+        }
+
+        .stat-item:hover {
+            transform: scale(1.05);
+            border-color: var(--accent-primary);
         }
 
         .stat-number {
-            font-size: 3rem;
-            font-weight: 700;
+            font-size: 3.5rem;
+            font-weight: 800;
             background: var(--accent-gradient);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
             display: block;
+            line-height: 1;
         }
 
         .stat-label {
             color: var(--text-secondary);
-            margin-top: 0.5rem;
+            margin-top: 0.75rem;
+            font-weight: 500;
+        }
+
+        @media (max-width: 768px) {
+            .about-header h1 {
+                font-size: 2.5rem;
+            }
+            .about-section {
+                padding: 2rem;
+            }
         }
     </style>
 </head>
@@ -164,7 +240,7 @@
 
     <!-- About Header -->
     <section class="about-header">
-        <h1>About NexusHub</h1>
+        <h1><i class="fas fa-heart" style="margin-right: 0.75rem;"></i>About NexusHub</h1>
         <p>Building the future of web applications with a focus on simplicity, privacy, and user experience</p>
     </section>
 
@@ -186,7 +262,7 @@
 
         <!-- Values Section -->
         <div class="about-section">
-            <h2><i class="fas fa-heart"></i> Our Values</h2>
+            <h2><i class="fas fa-gem"></i> Our Values</h2>
             <div class="values-grid">
                 <div class="value-card">
                     <i class="fas fa-user-shield"></i>
