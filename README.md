@@ -40,9 +40,15 @@ All applications are:
 │   ├── docs.html           # Documentation page
 │   └── contact.html        # Contact page
 ├── apps/
-│   └── whiteboard/
-│       ├── index.html      # Whiteboard app
-│       └── whiteboard.js   # Whiteboard functionality
+│   ├── whiteboard/
+│   │   ├── index.html      # Whiteboard app
+│   │   └── whiteboard.js   # Whiteboard functionality
+│   └── web-vm/
+│       ├── index.html      # Web VM app
+│       ├── vm.css          # VM styles
+│       ├── vm.js           # VM logic
+│       ├── x86.min.js      # v86 emulator stub
+│       └── README.md       # VM documentation
 └── README.md               # This file
 ```
 
@@ -119,6 +125,24 @@ Our first fully functional app!
 
 **Location:** `/apps/whiteboard/index.html`
 
+### ✅ Web VM (x86 Virtual Machine)
+Our second major app - run operating systems in your browser!
+
+**Features:**
+- 🖥️ x86 CPU emulation using WebAssembly
+- 🐧 Multiple OS support (Tiny Core Linux, KolibriOS, FreeBSD)
+- 💿 Custom ISO/image upload
+- ⚙️ Configurable RAM (32-512MB) and CPU cores (1-4)
+- ⌨️ Physical and virtual keyboard support
+- 📟 Real-time terminal output
+- 🖼️ Fullscreen mode
+- 🎨 macOS-inspired UI
+- 💾 Fully client-side - no backend required
+
+**Location:** `/apps/web-vm/index.html`
+
+**Note:** Currently runs in simulation mode. For full x86 emulation, download v86 library files (see app README).
+
 ---
 
 ## 📋 Planned Apps
@@ -128,6 +152,7 @@ Here are the apps we plan to build:
 | App | Status | Description |
 |-----|--------|-------------|
 | Whiteboard | ✅ Built | GoodNotes-style digital whiteboard |
+| Web VM | ✅ Built | x86 virtual machine with OS emulation |
 | AI Chat Room | 🔜 Upcoming | Real-time chat with Firebase |
 | Cloud Notes | 📅 Planned | Sync notes across devices |
 | Password Manager | 📅 Planned | Secure password storage |
@@ -208,10 +233,12 @@ NexusHub works best on modern browsers:
 - [x] Homepage with modern design
 - [x] Basic pages (News, Apps, About, Docs, Contact)
 - [x] Whiteboard app
+- [x] Web VM app (x86 emulation)
 - [ ] Theme customization options
 
 ### Phase 2 (Next)
 - [ ] AI Chat Room with Firebase
+- [ ] Full v86 integration for Web VM
 - [ ] Cloud Notes app
 - [ ] Local storage for saving drawings
 - [ ] PWA support (install as app)
