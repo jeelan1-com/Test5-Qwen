@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web VM - NexusHub</title>
+    <link rel="stylesheet" href="../../styles.css">
+    <link rel="stylesheet" href="vm.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="../../index.html" class="logo">
+                <span class="logo-icon">◆</span>
+                <span>NexusHub</span>
+            </a>
+            <ul class="nav-menu">
+                <li><a href="../../index.html">Home</a></li>
+                <li><a href="../pages/news.html">News</a></li>
+                <li><a href="../pages/about.html">About</a></li>
+                <li><a href="../pages/docs.html">Docs</a></li>
+                <li><a href="../pages/contact.html">Contact</a></li>
+                <li><a href="../pages/apps.html">Apps</a></li>
+            </ul>
+            <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+                <span class="sun">☀️</span>
+                <span class="moon">🌙</span>
+            </button>
+            <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Toggle menu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="vm-main">
+        <div class="vm-container">
+            <!-- Header -->
+            <header class="vm-header">
+                <div class="vm-title">
+                    <h1>🖥️ Web VM</h1>
+                    <p>x86 Virtual Machine in your browser</p>
+                </div>
+                <div class="vm-controls">
+                    <button class="control-btn" id="powerBtn" title="Power On/Off">
+                        <span class="icon">⏻</span>
+                        <span>Power</span>
+                    </button>
+                    <button class="control-btn" id="resetBtn" title="Reset VM">
+                        <span class="icon">↻</span>
+                        <span>Reset</span>
+                    </button>
+                    <button class="control-btn" id="fullscreenBtn" title="Fullscreen">
+                        <span class="icon">⛶</span>
+                        <span>Fullscreen</span>
+                    </button>
+                </div>
+            </header>
+
+            <!-- OS Selection -->
+            <section class="os-selector">
+                <h3>Select Operating System</h3>
+                <div class="os-grid">
+                    <div class="os-card active" data-os="tinycore">
+                        <div class="os-icon">🐧</div>
+                        <div class="os-info">
+                            <h4>Tiny Core Linux</h4>
+                            <p>Lightweight (15MB) - Fast boot</p>
+                        </div>
+                        <div class="os-status">Ready</div>
+                    </div>
+                    <div class="os-card" data-os="kolibrios">
+                        <div class="os-icon">💠</div>
+                        <div class="os-info">
+                            <h4>KolibriOS</h4>
+                            <p>Ultra-fast x86 OS (1.4MB)</p>
+                        </div>
+                        <div class="os-status">Ready</div>
+                    </div>
+                    <div class="os-card" data-os="freebsd">
+                        <div class="os-icon">😈</div>
+                        <div class="os-info">
+                            <h4>FreeBSD</h4>
+                            <p>Advanced Unix-like system</p>
+                        </div>
+                        <div class="os-status">Loading...</div>
+                    </div>
+                    <div class="os-card" data-os="custom">
+                        <div class="os-icon">📀</div>
+                        <div class="os-info">
+                            <h4>Custom ISO</h4>
+                            <p>Upload your own disk image</p>
+                        </div>
+                        <div class="os-status">Upload</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- VM Display -->
+            <section class="vm-display-section">
+                <div class="vm-screen-container">
+                    <div class="vm-screen" id="vmScreen">
+                        <canvas id="vmCanvas"></canvas>
+                        <div class="vm-overlay" id="vmOverlay">
+                            <div class="overlay-content">
+                                <div class="spinner"></div>
+                                <p id="overlayText">VM is powered off</p>
+                                <p class="hint">Click Power button to start</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Terminal Output -->
+                <div class="vm-terminal" id="vmTerminal">
+                    <div class="terminal-header">
+                        <span>Terminal Output</span>
+                        <button class="clear-btn" id="clearTerminal">Clear</button>
+                    </div>
+                    <div class="terminal-content" id="terminalContent">
+                        <div class="log-entry info">[System] Web VM initialized</div>
+                        <div class="log-entry info">[System] Ready to boot virtual machine</div>
+                        <div class="log-entry warning">[Info] Select an OS and click Power to start</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Controls Panel -->
+            <section class="controls-panel">
+                <div class="panel-section">
+                    <h4>Storage</h4>
+                    <div class="storage-info">
+                        <div class="storage-item">
+                            <span>Disk Image:</span>
+                            <span id="diskStatus">No disk loaded</span>
+                        </div>
+                        <input type="file" id="diskInput" accept=".img,.iso,.vdi" style="display:none;">
+                        <button class="btn-small" id="loadDiskBtn">Load Disk</button>
+                    </div>
+                </div>
+
+                <div class="panel-section">
+                    <h4>Memory</h4>
+                    <div class="memory-control">
+                        <label for="memorySlider">RAM: <span id="memoryValue">128</span> MB</label>
+                        <input type="range" id="memorySlider" min="32" max="512" step="32" value="128">
+                    </div>
+                </div>
+
+                <div class="panel-section">
+                    <h4>CPU Cores</h4>
+                    <div class="cpu-control">
+                        <label for="cpuSelect">Cores:</label>
+                        <select id="cpuSelect">
+                            <option value="1">1 Core</option>
+                            <option value="2">2 Cores</option>
+                            <option value="4">4 Cores</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="panel-section">
+                    <h4>Network</h4>
+                    <div class="network-status">
+                        <span class="status-dot"></span>
+                        <span id="networkText">Disconnected</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Keyboard Input -->
+            <section class="keyboard-section">
+                <div class="keyboard-hint">
+                    <p>⌨️ Type directly or use the virtual keyboard below</p>
+                    <p class="small">Press Ctrl+Alt to release mouse capture</p>
+                </div>
+                <div class="virtual-keyboard" id="virtualKeyboard">
+                    <!-- Generated by JS -->
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h4>NexusHub</h4>
+                <p>Next-generation web applications platform</p>
+            </div>
+            <div class="footer-section">
+                <h4>Quick Links</h4>
+                <a href="../../index.html">Home</a>
+                <a href="../pages/news.html">News</a>
+                <a href="../pages/apps.html">Apps</a>
+                <a href="../pages/docs.html">Documentation</a>
+            </div>
+            <div class="footer-section">
+                <h4>Legal</h4>
+                <a href="#">Privacy Policy</a>
+                <a href="#">Terms of Service</a>
+                <a href="#">License</a>
+            </div>
+            <div class="footer-section">
+                <h4>Theme</h4>
+                <button class="theme-toggle footer-theme-toggle" id="footerThemeToggle" aria-label="Toggle theme">
+                    <span class="sun">☀️</span>
+                    <span class="moon">🌙</span>
+                </button>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2024 NexusHub. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="../../script.js"></script>
+    <script src="x86.min.js"></script>
+    <script src="vm.js"></script>
+</body>
+</html>
