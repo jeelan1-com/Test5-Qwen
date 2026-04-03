@@ -2,459 +2,108 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Whiteboard - NexusHub</title>
-    <link rel="stylesheet" href="../../styles.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        :root {
-            --toolbar-bg: rgba(255, 255, 255, 0.9);
-            --toolbar-border: rgba(0, 0, 0, 0.1);
-            --canvas-bg: #ffffff;
-        }
-
-        [data-theme="dark"] {
-            --toolbar-bg: rgba(30, 41, 59, 0.95);
-            --toolbar-border: rgba(255, 255, 255, 0.1);
-            --canvas-bg: #1e293b;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Inter', sans-serif;
-            overflow: hidden;
-            background: var(--bg-secondary);
-        }
-
-        .whiteboard-container {
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
-        }
-
-        /* Top Navigation */
-        .wb-navbar {
-            background: var(--toolbar-bg);
-            backdrop-filter: blur(20px);
-            border-bottom: 1px solid var(--toolbar-border);
-            padding: 0.75rem 1.5rem;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            z-index: 100;
-        }
-
-        .wb-logo {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            font-weight: 700;
-            font-size: 1.25rem;
-            color: var(--text-primary);
-        }
-
-        .wb-logo i {
-            background: var(--accent-gradient);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .wb-nav-actions {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-
-        .wb-btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            padding: 0.5rem 1rem;
-            border-radius: 0.5rem;
-            font-size: 0.875rem;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            border: none;
-        }
-
-        .wb-btn-primary {
-            background: var(--accent-gradient);
-            color: white;
-        }
-
-        .wb-btn-secondary {
-            background: var(--bg-tertiary);
-            color: var(--text-primary);
-        }
-
-        .wb-btn-secondary:hover {
-            background: var(--border-color);
-        }
-
-        .wb-btn-icon {
-            width: 40px;
-            height: 40px;
-            padding: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 0.5rem;
-            background: var(--bg-tertiary);
-            color: var(--text-primary);
-        }
-
-        .wb-btn-icon:hover {
-            background: var(--accent-primary);
-            color: white;
-        }
-
-        .wb-btn-icon.active {
-            background: var(--accent-primary);
-            color: white;
-        }
-
-        /* Toolbar */
-        .toolbar {
-            background: var(--toolbar-bg);
-            backdrop-filter: blur(20px);
-            border-bottom: 1px solid var(--toolbar-border);
-            padding: 1rem 1.5rem;
-            display: flex;
-            align-items: center;
-            gap: 2rem;
-            flex-wrap: wrap;
-        }
-
-        .tool-group {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .tool-group-label {
-            font-size: 0.75rem;
-            font-weight: 600;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-right: 0.5rem;
-        }
-
-        .color-picker {
-            display: flex;
-            gap: 0.5rem;
-        }
-
-        .color-btn {
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            border: 2px solid transparent;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-
-        .color-btn:hover,
-        .color-btn.active {
-            transform: scale(1.15);
-            border-color: var(--text-primary);
-        }
-
-        .color-black { background: #000000; }
-        .color-blue { background: #3b82f6; }
-        .color-red { background: #ef4444; }
-        .color-green { background: #22c55e; }
-        .color-orange { background: #f97316; }
-        .color-purple { background: #a855f7; }
-
-        .size-slider {
-            width: 100px;
-            height: 6px;
-            border-radius: 3px;
-            background: var(--bg-tertiary);
-            outline: none;
-            -webkit-appearance: none;
-        }
-
-        .size-slider::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            width: 16px;
-            height: 16px;
-            border-radius: 50%;
-            background: var(--accent-primary);
-            cursor: pointer;
-        }
-
-        /* Canvas Area */
-        .canvas-wrapper {
-            flex: 1;
-            position: relative;
-            overflow: hidden;
-            background: var(--canvas-bg);
-        }
-
-        #whiteboard {
-            position: absolute;
-            top: 0;
-            left: 0;
-            cursor: crosshair;
-        }
-
-        /* Pages Panel */
-        .pages-panel {
-            position: fixed;
-            right: 0;
-            top: 50%;
-            transform: translateY(-50%);
-            background: var(--toolbar-bg);
-            backdrop-filter: blur(20px);
-            border: 1px solid var(--toolbar-border);
-            border-radius: 1rem 0 0 1rem;
-            padding: 1rem;
-            display: flex;
-            flex-direction: column;
-            gap: 0.75rem;
-            max-height: 60vh;
-            overflow-y: auto;
-            z-index: 50;
-        }
-
-        .page-thumbnail {
-            width: 60px;
-            height: 80px;
-            background: var(--bg-primary);
-            border: 2px solid var(--border-color);
-            border-radius: 0.5rem;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            position: relative;
-        }
-
-        .page-thumbnail:hover,
-        .page-thumbnail.active {
-            border-color: var(--accent-primary);
-            transform: scale(1.05);
-        }
-
-        .page-thumbnail canvas {
-            width: 100%;
-            height: 100%;
-            border-radius: 0.25rem;
-        }
-
-        .add-page-btn {
-            width: 60px;
-            height: 80px;
-            border-radius: 0.5rem;
-            border: 2px dashed var(--border-color);
-            background: transparent;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--text-muted);
-            transition: all 0.2s ease;
-        }
-
-        .add-page-btn:hover {
-            border-color: var(--accent-primary);
-            color: var(--accent-primary);
-        }
-
-        /* Modal */
-        .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.5);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-        }
-
-        .modal-overlay.active {
-            display: flex;
-        }
-
-        .modal {
-            background: var(--bg-primary);
-            border-radius: 1rem;
-            padding: 2rem;
-            max-width: 400px;
-            width: 90%;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-        }
-
-        .modal h3 {
-            margin-bottom: 1rem;
-            color: var(--text-primary);
-        }
-
-        .modal-actions {
-            display: flex;
-            gap: 1rem;
-            margin-top: 1.5rem;
-        }
-
-        .modal-actions .wb-btn {
-            flex: 1;
-            justify-content: center;
-        }
-
-        /* Hidden file input */
-        #pdfInput {
-            display: none;
-        }
-
-        /* Responsive */
-        @media (max-width: 768px) {
-            .toolbar {
-                padding: 0.75rem;
-                gap: 1rem;
-            }
-
-            .tool-group {
-                gap: 0.25rem;
-            }
-
-            .size-slider {
-                width: 60px;
-            }
-
-            .pages-panel {
-                display: none;
-            }
-        }
-    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Whiteboard - Nexus Hub</title>
+    <link rel="stylesheet" href="whiteboard.css">
 </head>
 <body>
-    <div class="whiteboard-container">
-        <!-- Top Navigation -->
-        <nav class="wb-navbar">
-            <div class="wb-logo">
-                <i class="fas fa-pen-fancy"></i>
-                <span>Whiteboard</span>
-            </div>
-            <div class="wb-nav-actions">
-                <button class="wb-btn wb-btn-icon" id="themeToggle" title="Toggle Theme">
-                    <i class="fas fa-moon"></i>
-                </button>
-                <a href="../../index.html" class="wb-btn wb-btn-secondary">
-                    <i class="fas fa-home"></i>
-                    Home
-                </a>
-                <button class="wb-btn wb-btn-primary" id="exportBtn">
-                    <i class="fas fa-download"></i>
-                    Export
-                </button>
-            </div>
-        </nav>
-
-        <!-- Toolbar -->
-        <div class="toolbar">
-            <!-- Tools -->
-            <div class="tool-group">
-                <span class="tool-group-label">Tools</span>
-                <button class="wb-btn wb-btn-icon active" data-tool="pen" title="Pen">
-                    <i class="fas fa-pen"></i>
-                </button>
-                <button class="wb-btn wb-btn-icon" data-tool="highlighter" title="Highlighter">
-                    <i class="fas fa-highlighter"></i>
-                </button>
-                <button class="wb-btn wb-btn-icon" data-tool="eraser" title="Eraser">
-                    <i class="fas fa-eraser"></i>
-                </button>
-            </div>
-
-            <!-- Colors -->
-            <div class="tool-group">
-                <span class="tool-group-label">Color</span>
-                <div class="color-picker">
-                    <button class="color-btn color-black active" data-color="#000000"></button>
-                    <button class="color-btn color-blue" data-color="#3b82f6"></button>
-                    <button class="color-btn color-red" data-color="#ef4444"></button>
-                    <button class="color-btn color-green" data-color="#22c55e"></button>
-                    <button class="color-btn color-orange" data-color="#f97316"></button>
-                    <button class="color-btn color-purple" data-color="#a855f7"></button>
-                </div>
-            </div>
-
-            <!-- Size -->
-            <div class="tool-group">
-                <span class="tool-group-label">Size</span>
-                <input type="range" class="size-slider" id="sizeSlider" min="1" max="50" value="3">
-            </div>
-
-            <!-- Actions -->
-            <div class="tool-group">
-                <span class="tool-group-label">Actions</span>
-                <button class="wb-btn wb-btn-icon" id="undoBtn" title="Undo">
-                    <i class="fas fa-undo"></i>
-                </button>
-                <button class="wb-btn wb-btn-icon" id="redoBtn" title="Redo">
-                    <i class="fas fa-redo"></i>
-                </button>
-                <button class="wb-btn wb-btn-icon" id="clearBtn" title="Clear All">
-                    <i class="fas fa-trash"></i>
-                </button>
-            </div>
-
-            <!-- Import -->
-            <div class="tool-group">
-                <span class="tool-group-label">Import</span>
-                <button class="wb-btn wb-btn-secondary" id="importPdfBtn">
-                    <i class="fas fa-file-pdf"></i>
-                    Import PDF
-                </button>
-                <input type="file" id="pdfInput" accept=".pdf">
+    <!-- Top Toolbar -->
+    <div class="toolbar glass-panel">
+        <div class="toolbar-section">
+            <a href="../../index.html" class="back-btn" title="Back to Home">
+                <span>←</span>
+            </a>
+            <h1 class="app-title">Whiteboard</h1>
+        </div>
+        
+        <div class="toolbar-section tools">
+            <button class="tool-btn active" data-tool="pen" title="Pen (P)">
+                <span>✏️</span>
+            </button>
+            <button class="tool-btn" data-tool="highlighter" title="Highlighter (H)">
+                <span>🖍️</span>
+            </button>
+            <button class="tool-btn" data-tool="eraser" title="Eraser (E)">
+                <span>🧹</span>
+            </button>
+        </div>
+        
+        <div class="toolbar-section colors">
+            <button class="color-btn active" data-color="#1d1d1f" style="background: #1d1d1f;"></button>
+            <button class="color-btn" data-color="#007aff" style="background: #007aff;"></button>
+            <button class="color-btn" data-color="#34c759" style="background: #34c759;"></button>
+            <button class="color-btn" data-color="#ff9500" style="background: #ff9500;"></button>
+            <button class="color-btn" data-color="#ff2d55" style="background: #ff2d55;"></button>
+            <button class="color-btn" data-color="#af52de" style="background: #af52de;"></button>
+            <input type="color" id="customColor" class="color-picker" title="Custom Color">
+        </div>
+        
+        <div class="toolbar-section">
+            <div class="stroke-size">
+                <input type="range" id="strokeSize" min="1" max="50" value="3">
+                <span id="strokeSizeValue">3</span>
             </div>
         </div>
-
-        <!-- Canvas -->
-        <div class="canvas-wrapper" id="canvasWrapper">
-            <canvas id="whiteboard"></canvas>
+        
+        <div class="toolbar-section actions">
+            <button class="action-btn" id="undoBtn" title="Undo (Ctrl+Z)">
+                <span>↩️</span>
+            </button>
+            <button class="action-btn" id="redoBtn" title="Redo (Ctrl+Y)">
+                <span>↪️</span>
+            </button>
+            <button class="action-btn" id="clearBtn" title="Clear Canvas">
+                <span>🗑️</span>
+            </button>
         </div>
-
-        <!-- Pages Panel -->
-        <div class="pages-panel" id="pagesPanel">
-            <div class="page-thumbnail active" data-page="0">
-                <canvas id="thumb0"></canvas>
-            </div>
-            <button class="add-page-btn" id="addPageBtn" title="Add Page">
-                <i class="fas fa-plus"></i>
+        
+        <div class="toolbar-section file-actions">
+            <button class="action-btn primary" id="importPdf" title="Import PDF">
+                <span>📄</span> Import
+            </button>
+            <button class="action-btn primary" id="exportPng" title="Export as PNG">
+                <span>💾</span> PNG
+            </button>
+            <button class="action-btn primary" id="exportPdf" title="Export as PDF">
+                <span>📑</span> PDF
+            </button>
+        </div>
+        
+        <div class="toolbar-section">
+            <button class="theme-toggle" id="themeToggle" title="Toggle Theme">
+                <span>🌙</span>
             </button>
         </div>
     </div>
-
-    <!-- Export Modal -->
-    <div class="modal-overlay" id="exportModal">
-        <div class="modal">
-            <h3>Export As</h3>
-            <p style="color: var(--text-secondary); margin-bottom: 1.5rem;">Choose your preferred format</p>
-            <div class="modal-actions">
-                <button class="wb-btn wb-btn-secondary" id="exportPng">
-                    <i class="fas fa-image"></i>
-                    PNG
-                </button>
-                <button class="wb-btn wb-btn-primary" id="exportPdf">
-                    <i class="fas fa-file-pdf"></i>
-                    PDF
-                </button>
-            </div>
+    
+    <!-- Pages Sidebar -->
+    <div class="pages-sidebar glass-panel">
+        <div class="pages-header">
+            <h3>Pages</h3>
+            <button class="add-page-btn" id="addPage" title="Add Page">+</button>
+        </div>
+        <div class="pages-list" id="pagesList">
+            <!-- Page thumbnails will be added here -->
         </div>
     </div>
+    
+    <!-- Main Canvas Area -->
+    <div class="canvas-container">
+        <canvas id="whiteboard"></canvas>
+        <div class="canvas-overlay" id="canvasOverlay"></div>
+    </div>
+    
+    <!-- Hidden file input for PDF import -->
+    <input type="file" id="pdfInput" accept=".pdf" style="display: none;">
+    
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-spinner"></div>
+        <p>Loading...</p>
+    </div>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="whiteboard.js"></script>
 </body>
 </html>
