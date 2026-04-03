@@ -16,20 +16,41 @@
 
         .news-header {
             text-align: center;
-            padding: 4rem 2rem;
+            padding: 5rem 2rem 4rem;
+            background: transparent;
+            margin-bottom: 2rem;
+            position: relative;
+        }
+
+        .news-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
             background: var(--accent-gradient);
-            margin-bottom: 3rem;
+            opacity: 0.1;
+            border-radius: 2rem;
+            z-index: -1;
         }
 
         .news-header h1 {
-            font-size: 3rem;
-            color: white;
+            font-size: 3.5rem;
+            font-weight: 800;
+            background: var(--accent-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
             margin-bottom: 1rem;
+            letter-spacing: -0.02em;
         }
 
         .news-header p {
-            color: rgba(255, 255, 255, 0.9);
+            color: var(--text-secondary);
             font-size: 1.25rem;
+            max-width: 600px;
+            margin: 0 auto;
         }
 
         .timeline {
@@ -44,15 +65,17 @@
             position: absolute;
             left: 50%;
             transform: translateX(-50%);
-            width: 2px;
+            width: 3px;
             height: 100%;
-            background: var(--border-color);
+            background: var(--accent-gradient);
+            border-radius: 3px;
+            opacity: 0.3;
         }
 
         .timeline-item {
             display: flex;
             justify-content: flex-end;
-            padding-bottom: 3rem;
+            padding-bottom: 3.5rem;
             position: relative;
         }
 
@@ -63,70 +86,107 @@
         .timeline-content {
             width: 45%;
             background: var(--bg-primary);
-            border-radius: 1rem;
+            backdrop-filter: blur(20px);
+            border-radius: 1.5rem;
             padding: 2rem;
             box-shadow: var(--card-shadow);
             border: 1px solid var(--border-color);
-            transition: all 0.3s ease;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .timeline-content::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--accent-gradient);
+            transform: scaleX(0);
+            transition: transform 0.4s ease;
         }
 
         .timeline-content:hover {
-            transform: translateY(-5px);
+            transform: translateY(-8px);
             box-shadow: var(--card-hover-shadow);
+            border-color: var(--accent-primary);
+        }
+
+        .timeline-content:hover::before {
+            transform: scaleX(1);
         }
 
         .timeline-item:nth-child(odd) .timeline-content {
-            margin-right: 3rem;
+            margin-right: 3.5rem;
         }
 
         .timeline-item:nth-child(even) .timeline-content {
-            margin-left: 3rem;
+            margin-left: 3.5rem;
         }
 
         .timeline-dot {
             position: absolute;
             left: 50%;
             transform: translateX(-50%);
-            width: 20px;
-            height: 20px;
-            background: var(--accent-primary);
+            width: 24px;
+            height: 24px;
+            background: var(--bg-primary);
+            border: 4px solid var(--accent-primary);
             border-radius: 50%;
-            border: 4px solid var(--bg-primary);
             z-index: 10;
+            box-shadow: 0 0 0 4px var(--bg-secondary), var(--card-shadow);
+            transition: all 0.3s ease;
+        }
+
+        .timeline-item:hover .timeline-dot {
+            transform: translateX(-50%) scale(1.3);
+            box-shadow: 0 0 0 4px var(--bg-secondary), 0 0 20px var(--accent-primary);
         }
 
         .timeline-date {
-            display: inline-block;
-            padding: 0.5rem 1rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1.25rem;
             background: var(--accent-gradient);
             color: white;
             border-radius: 2rem;
             font-size: 0.875rem;
             font-weight: 600;
-            margin-bottom: 1rem;
+            margin-bottom: 1.25rem;
+            box-shadow: 0 4px 14px rgba(99, 102, 241, 0.4);
         }
 
         .timeline-badge {
-            display: inline-block;
-            padding: 0.25rem 0.75rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.375rem 0.875rem;
             background: var(--bg-tertiary);
             border-radius: 1rem;
             font-size: 0.75rem;
-            font-weight: 600;
+            font-weight: 700;
             color: var(--accent-primary);
-            margin-bottom: 0.5rem;
+            margin-bottom: 0.75rem;
             text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border: 1px solid var(--border-color);
         }
 
         .timeline-content h3 {
             font-size: 1.5rem;
+            font-weight: 700;
             margin-bottom: 0.75rem;
             color: var(--text-primary);
+            line-height: 1.3;
         }
 
         .timeline-content p {
             color: var(--text-secondary);
-            line-height: 1.7;
+            line-height: 1.8;
+            font-size: 0.95rem;
         }
 
         .version-tag {
@@ -135,11 +195,13 @@
             gap: 0.5rem;
             padding: 0.5rem 1rem;
             background: var(--bg-tertiary);
-            border-radius: 0.5rem;
-            font-family: monospace;
-            font-size: 0.875rem;
+            border-radius: 0.75rem;
+            font-family: 'SF Mono', 'Fira Code', monospace;
+            font-size: 0.8rem;
+            font-weight: 600;
             color: var(--accent-primary);
-            margin-top: 1rem;
+            margin-top: 1.25rem;
+            border: 1px solid var(--border-color);
         }
 
         @media (max-width: 768px) {
@@ -150,7 +212,7 @@
             .timeline-item,
             .timeline-item:nth-child(even) {
                 justify-content: flex-start;
-                padding-left: 50px;
+                padding-left: 55px;
             }
 
             .timeline-content,
@@ -165,7 +227,11 @@
             }
 
             .news-header h1 {
-                font-size: 2rem;
+                font-size: 2.5rem;
+            }
+
+            .news-header p {
+                font-size: 1.1rem;
             }
         }
     </style>
@@ -197,10 +263,10 @@
             </button>
         </div>
     </nav>
-
+    
     <!-- News Header -->
     <section class="news-header">
-        <h1>Latest News & Updates</h1>
+        <h1><i class="fas fa-newspaper" style="margin-right: 0.75rem;"></i>Latest News & Updates</h1>
         <p>Stay informed about our latest releases, features, and announcements</p>
     </section>
 
@@ -210,8 +276,8 @@
         <div class="timeline-item">
             <div class="timeline-dot"></div>
             <div class="timeline-content">
-                <span class="timeline-date">January 15, 2025</span>
-                <span class="timeline-badge">New App</span>
+                <span class="timeline-date"><i class="fas fa-calendar"></i> January 15, 2025</span>
+                <span class="timeline-badge"><i class="fas fa-rocket"></i> New App</span>
                 <h3>Whiteboard App Launched!</h3>
                 <p>We're excited to announce the launch of our GoodNotes-style Whiteboard app! Create beautiful notes, draw with multiple tools, import PDFs, and export your work. Fully offline and works in your browser.</p>
                 <div class="version-tag">
@@ -225,8 +291,8 @@
         <div class="timeline-item">
             <div class="timeline-dot"></div>
             <div class="timeline-content">
-                <span class="timeline-date">January 10, 2025</span>
-                <span class="timeline-badge">Platform Update</span>
+                <span class="timeline-date"><i class="fas fa-calendar"></i> January 10, 2025</span>
+                <span class="timeline-badge"><i class="fas fa-paint-brush"></i> Platform Update</span>
                 <h3>Dark Mode Now Available</h3>
                 <p>Your favorite platform now supports dark mode! Toggle between light and dark themes seamlessly. Your preference is saved automatically for future visits.</p>
                 <div class="version-tag">
@@ -240,8 +306,8 @@
         <div class="timeline-item">
             <div class="timeline-dot"></div>
             <div class="timeline-content">
-                <span class="timeline-date">January 5, 2025</span>
-                <span class="timeline-badge">Announcement</span>
+                <span class="timeline-date"><i class="fas fa-calendar"></i> January 5, 2025</span>
+                <span class="timeline-badge"><i class="fas fa-star"></i> Announcement</span>
                 <h3>Welcome to NexusHub</h3>
                 <p>We're thrilled to introduce NexusHub - your all-in-one platform for apps, services, AI tools, utilities, and creative tools. Built with a modern macOS-inspired design, our platform brings together everything you need in one beautiful interface.</p>
                 <div class="version-tag">
@@ -255,8 +321,8 @@
         <div class="timeline-item">
             <div class="timeline-dot"></div>
             <div class="timeline-content">
-                <span class="timeline-date">Coming Soon</span>
-                <span class="timeline-badge">Preview</span>
+                <span class="timeline-date"><i class="fas fa-clock"></i> Coming Soon</span>
+                <span class="timeline-badge"><i class="fas fa-eye"></i> Preview</span>
                 <h3>AI Chat Room</h3>
                 <p>Get ready for our upcoming AI Chat Room feature! Connect with other users in real-time, powered by Firebase. More details coming soon.</p>
             </div>
