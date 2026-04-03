@@ -1,36 +1,45 @@
-```
-# Logs and temp files
-*.log
-*.tmp
-*.swp
-
-# Environment
-.env
-.env.local
-*.env.*
-
-# Editors
-.vscode/
-.idea/
+```gitignore
+# Compiled and build artifacts
+*.pyc
+__pycache__/
+*.o
+*.obj
+*.class
+*.exe
+*.dll
+*.so
+*.a
+*.out
 
 # Dependencies
 node_modules/
 venv/
 .venv/
-__pycache__/
-.mypy_cache/
-.pytest_cache/
+.env
+.env.local
+*.env.*
 
-# Build artifacts
+# Build directories
 dist/
 build/
 target/
+*.log
+coverage/
+htmlcov/
+*.coverage
 
-# OS generated files
+# Editors and IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*.tmp
+
+# System files
 .DS_Store
 Thumbs.db
 
-# Compression files
+# Compression and archives
 *.zip
 *.gz
 *.tar
@@ -54,11 +63,90 @@ Thumbs.db
 *.tar.xz
 *.tar.zst
 
-# Coverage reports
-coverage/
-htmlcov/
+# Python specific
+*.pyc
+__pycache__/
+*.pyo
+*.pyd
+.Python
+*.so
 .coverage
+.coverage.*
+.cache
+.pytest_cache/
+.mypy_cache/
 
-# Original rules preserved
+# JavaScript/Node specific
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
 *.log
+
+# Java specific
+*.class
+*.jar
+*.war
+*.ear
+hs_err_pid*
+replay_pid*
+
+# C/C++ specific
+*.o
+*.a
+*.la
+*.lo
+*.so
+*.so.*
+*.dylib
+*.dll
+*.exe
+
+# Go specific
+*.o
+*.a
+*.so
+*.exe
+*.test
+*.prof
+
+# Ruby specific
+*.gem
+*.rbc
+*.sass-cache
+.bundle/
+vendor/bundle/
+
+# Rust specific
+target/
+*.lock
+
+# Gradle
+.gradle/
+build/
+
+# Maven
+target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+dependency-reduced-pom.xml
+buildNumber.properties
+.mvn/timing.properties
+
+# Zig
+zig-cache/
+zig-out/
+
+# Julia
+julia-*/
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+*.backup
+*~
 ```
