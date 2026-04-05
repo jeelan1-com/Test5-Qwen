@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SharpStudio - C# IDE for Web</title>
+    <link rel="stylesheet" href="sharp-studio.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="ide-container">
+        <!-- Title Bar -->
+        <div class="title-bar">
+            <div class="window-controls">
+                <span class="control close"></span>
+                <span class="control minimize"></span>
+                <span class="control maximize"></span>
+            </div>
+            <div class="title-text">
+                <i class="fas fa-code"></i> SharpStudio
+                <span class="project-name" id="projectNameDisplay">Untitled Project</span>
+            </div>
+            <div class="title-actions">
+                <button class="btn-icon" id="themeToggle" title="Toggle Theme">
+                    <i class="fas fa-moon"></i>
+                </button>
+                <button class="btn-icon" id="fullscreenBtn" title="Fullscreen">
+                    <i class="fas fa-expand"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Menu Bar -->
+        <div class="menu-bar">
+            <div class="menu-item" data-menu="file">
+                File
+                <div class="dropdown">
+                    <div class="menu-option" onclick="newProject()">
+                        <i class="fas fa-file"></i> New Project
+                    </div>
+                    <div class="menu-option" onclick="openProject()">
+                        <i class="fas fa-folder-open"></i> Open Project
+                    </div>
+                    <div class="menu-option" onclick="saveProject()">
+                        <i class="fas fa-save"></i> Save Project
+                    </div>
+                    <div class="menu-option" onclick="exportProject()">
+                        <i class="fas fa-download"></i> Export
+                    </div>
+                    <div class="menu-divider"></div>
+                    <div class="menu-option" onclick="importFile()">
+                        <i class="fas fa-upload"></i> Import File
+                    </div>
+                </div>
+            </div>
+            <div class="menu-item" data-menu="edit">
+                Edit
+                <div class="dropdown">
+                    <div class="menu-option" onclick="editor.undo()">
+                        <i class="fas fa-undo"></i> Undo <span class="shortcut">Ctrl+Z</span>
+                    </div>
+                    <div class="menu-option" onclick="editor.redo()">
+                        <i class="fas fa-redo"></i> Redo <span class="shortcut">Ctrl+Y</span>
+                    </div>
+                    <div class="menu-divider"></div>
+                    <div class="menu-option" onclick="editor.cut()">
+                        <i class="fas fa-cut"></i> Cut <span class="shortcut">Ctrl+X</span>
+                    </div>
+                    <div class="menu-option" onclick="editor.copy()">
+                        <i class="fas fa-copy"></i> Copy <span class="shortcut">Ctrl+C</span>
+                    </div>
+                    <div class="menu-option" onclick="editor.paste()">
+                        <i class="fas fa-paste"></i> Paste <span class="shortcut">Ctrl+V</span>
+                    </div>
+                </div>
+            </div>
+            <div class="menu-item" data-menu="view">
+                View
+                <div class="dropdown">
+                    <div class="menu-option" onclick="togglePanel('explorer')">
+                        <i class="fas fa-folder"></i> Explorer
+                    </div>
+                    <div class="menu-option" onclick="togglePanel('output')">
+                        <i class="fas fa-terminal"></i> Output
+                    </div>
+                    <div class="menu-option" onclick="togglePanel('problems')">
+                        <i class="fas fa-exclamation-triangle"></i> Problems
+                    </div>
+                </div>
+            </div>
+            <div class="menu-item" data-menu="run">
+                Run
+                <div class="dropdown">
+                    <div class="menu-option" onclick="compileAndRun()">
+                        <i class="fas fa-play"></i> Run <span class="shortcut">F5</span>
+                    </div>
+                    <div class="menu-option" onclick="compileOnly()">
+                        <i class="fas fa-cog"></i> Build <span class="shortcut">Ctrl+Shift+B</span>
+                    </div>
+                    <div class="menu-option" onclick="stopExecution()">
+                        <i class="fas fa-stop"></i> Stop <span class="shortcut">Shift+F5</span>
+                    </div>
+                </div>
+            </div>
+            <div class="menu-item" data-menu="help">
+                Help
+                <div class="dropdown">
+                    <div class="menu-option" onclick="showShortcuts()">
+                        <i class="fas fa-keyboard"></i> Keyboard Shortcuts
+                    </div>
+                    <div class="menu-option" onclick="showDocumentation()">
+                        <i class="fas fa-book"></i> Documentation
+                    </div>
+                    <div class="menu-option" onclick="showAbout()">
+                        <i class="fas fa-info-circle"></i> About SharpStudio
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Sidebar - Explorer -->
+            <div class="sidebar" id="explorerPanel">
+                <div class="panel-header">
+                    <span><i class="fas fa-folder"></i> EXPLORER</span>
+                    <div class="panel-actions">
+                        <button class="btn-sm" onclick="addNewFile()" title="New File">
+                            <i class="fas fa-file-plus"></i>
+                        </button>
+                        <button class="btn-sm" onclick="addNewFolder()" title="New Folder">
+                            <i class="fas fa-folder-plus"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="file-tree" id="fileTree">
+                    <div class="tree-item folder expanded" data-path="root">
+                        <div class="tree-label" onclick="toggleFolder(this)">
+                            <i class="fas fa-chevron-down"></i>
+                            <i class="fas fa-folder-open"></i>
+                            <span>Project Root</span>
+                        </div>
+                        <div class="tree-children" id="fileTreeChildren">
+                            <!-- Files will be added here dynamically -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Editor Area -->
+            <div class="editor-area">
+                <!-- Tabs -->
+                <div class="tabs-bar" id="tabsBar">
+                    <div class="tab active" data-file="Program.cs">
+                        <span class="tab-name">Program.cs</span>
+                        <button class="tab-close" onclick="closeTab('Program.cs')">×</button>
+                    </div>
+                </div>
+
+                <!-- Editor Container -->
+                <div class="editor-container">
+                    <div class="line-numbers" id="lineNumbers"></div>
+                    <textarea 
+                        class="code-editor" 
+                        id="codeEditor" 
+                        spellcheck="false"
+                        autocapitalize="off"
+                        autocomplete="off"
+                        autocorrect="off"
+                    ></textarea>
+                    <div class="syntax-highlight" id="syntaxHighlight"></div>
+                </div>
+
+                <!-- Status Bar -->
+                <div class="status-bar">
+                    <div class="status-left">
+                        <span id="cursorPosition">Ln 1, Col 1</span>
+                        <span id="selectionInfo"></span>
+                    </div>
+                    <div class="status-right">
+                        <span>C#</span>
+                        <span id="fileEncoding">UTF-8</span>
+                        <span id="lineEnding">CRLF</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Panel - Output/Problems -->
+            <div class="right-panel" id="rightPanel">
+                <div class="panel-tabs">
+                    <button class="panel-tab active" data-panel="output" onclick="switchRightPanel('output')">
+                        <i class="fas fa-terminal"></i> Output
+                    </button>
+                    <button class="panel-tab" data-panel="problems" onclick="switchRightPanel('problems')">
+                        <i class="fas fa-exclamation-triangle"></i> Problems
+                        <span class="badge" id="problemsBadge">0</span>
+                    </button>
+                    <button class="panel-tab" data-panel="references" onclick="switchRightPanel('references')">
+                        <i class="fas fa-link"></i> References
+                    </button>
+                </div>
+
+                <div class="panel-content" id="outputPanel">
+                    <div class="panel-header">
+                        <span>Output</span>
+                        <button class="btn-sm" onclick="clearOutput()" title="Clear">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                    <div class="output-content" id="outputContent">
+                        <div class="output-line info">SharpStudio Ready</div>
+                        <div class="output-line info">Waiting for commands...</div>
+                    </div>
+                </div>
+
+                <div class="panel-content hidden" id="problemsPanel">
+                    <div class="panel-header">
+                        <span>Problems</span>
+                        <span class="problem-count" id="problemCount">0 problems found</span>
+                    </div>
+                    <div class="problems-content" id="problemsContent">
+                        <div class="no-problems">
+                            <i class="fas fa-check-circle"></i>
+                            <p>No problems detected</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="panel-content hidden" id="referencesPanel">
+                    <div class="panel-header">
+                        <span>References</span>
+                        <button class="btn-sm" onclick="addReference()" title="Add Reference">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                    </div>
+                    <div class="references-content" id="referencesContent">
+                        <div class="reference-item">
+                            <i class="fas fa-book"></i>
+                            <span>System.Runtime</span>
+                        </div>
+                        <div class="reference-item">
+                            <i class="fas fa-book"></i>
+                            <span>System.Collections</span>
+                        </div>
+                        <div class="reference-item">
+                            <i class="fas fa-book"></i>
+                            <span>System.Linq</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Toolbar -->
+        <div class="toolbar">
+            <button class="tool-btn" onclick="newProject()" title="New Project">
+                <i class="fas fa-file"></i>
+            </button>
+            <button class="tool-btn" onclick="saveProject()" title="Save">
+                <i class="fas fa-save"></i>
+            </button>
+            <div class="toolbar-divider"></div>
+            <button class="tool-btn" onclick="editor.undo()" title="Undo">
+                <i class="fas fa-undo"></i>
+            </button>
+            <button class="tool-btn" onclick="editor.redo()" title="Redo">
+                <i class="fas fa-redo"></i>
+            </button>
+            <div class="toolbar-divider"></div>
+            <button class="tool-btn primary" onclick="compileAndRun()" title="Run (F5)">
+                <i class="fas fa-play"></i> Run
+            </button>
+            <button class="tool-btn" onclick="compileOnly()" title="Build">
+                <i class="fas fa-cog"></i> Build
+            </button>
+            <button class="tool-btn danger" onclick="stopExecution()" title="Stop">
+                <i class="fas fa-stop"></i>
+            </button>
+            <div class="toolbar-divider"></div>
+            <button class="tool-btn" onclick="formatCode()" title="Format Code">
+                <i class="fas fa-align-left"></i>
+            </button>
+            <button class="tool-btn" onclick="findReplace()" title="Find & Replace">
+                <i class="fas fa-search"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Modals -->
+    <div class="modal-overlay hidden" id="newProjectModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>New Project</h3>
+                <button class="modal-close" onclick="closeModal('newProjectModal')">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Project Name</label>
+                    <input type="text" id="newProjectName" placeholder="MyApplication">
+                </div>
+                <div class="form-group">
+                    <label>Project Type</label>
+                    <select id="projectType">
+                        <option value="console">Console Application</option>
+                        <option value="classlib">Class Library</option>
+                        <option value="webapi">ASP.NET Core Web API</option>
+                        <option value="mvc">ASP.NET Core MVC</option>
+                        <option value="blazor">Blazor WebAssembly</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>.NET Version</label>
+                    <select id="dotnetVersion">
+                        <option value="net8.0">.NET 8.0</option>
+                        <option value="net7.0">.NET 7.0</option>
+                        <option value="net6.0">.NET 6.0</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('newProjectModal')">Cancel</button>
+                <button class="btn btn-primary" onclick="createNewProject()">Create</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay hidden" id="findReplaceModal">
+        <div class="modal modal-small">
+            <div class="modal-header">
+                <h3>Find & Replace</h3>
+                <button class="modal-close" onclick="closeModal('findReplaceModal')">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Find</label>
+                    <input type="text" id="findText" placeholder="Text to find">
+                </div>
+                <div class="form-group">
+                    <label>Replace</label>
+                    <input type="text" id="replaceText" placeholder="Replacement text">
+                </div>
+                <div class="checkbox-group">
+                    <label>
+                        <input type="checkbox" id="matchCase"> Match Case
+                    </label>
+                    <label>
+                        <input type="checkbox" id="wholeWord"> Whole Word
+                    </label>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="findNext()">Find Next</button>
+                <button class="btn btn-primary" onclick="replaceOne()">Replace</button>
+                <button class="btn btn-primary" onclick="replaceAll()">Replace All</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay hidden" id="shortcutsModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>Keyboard Shortcuts</h3>
+                <button class="modal-close" onclick="closeModal('shortcutsModal')">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="shortcuts-grid">
+                    <div class="shortcut-item">
+                        <span class="shortcut-keys">Ctrl+S</span>
+                        <span class="shortcut-desc">Save</span>
+                    </div>
+                    <div class="shortcut-item">
+                        <span class="shortcut-keys">Ctrl+Z</span>
+                        <span class="shortcut-desc">Undo</span>
+                    </div>
+                    <div class="shortcut-item">
+                        <span class="shortcut-keys">Ctrl+Y</span>
+                        <span class="shortcut-desc">Redo</span>
+                    </div>
+                    <div class="shortcut-item">
+                        <span class="shortcut-keys">F5</span>
+                        <span class="shortcut-desc">Run</span>
+                    </div>
+                    <div class="shortcut-item">
+                        <span class="shortcut-keys">Ctrl+Shift+B</span>
+                        <span class="shortcut-desc">Build</span>
+                    </div>
+                    <div class="shortcut-item">
+                        <span class="shortcut-keys">Ctrl+F</span>
+                        <span class="shortcut-desc">Find</span>
+                    </div>
+                    <div class="shortcut-item">
+                        <span class="shortcut-keys">Ctrl+H</span>
+                        <span class="shortcut-desc">Replace</span>
+                    </div>
+                    <div class="shortcut-item">
+                        <span class="shortcut-keys">Ctrl+/</span>
+                        <span class="shortcut-desc">Toggle Comment</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hidden file input -->
+    <input type="file" id="fileInput" style="display: none;" accept=".cs,.csproj,.sln,.json,.xml,.txt" multiple>
+    
+    <script src="sharp-studio.js"></script>
+</body>
+</html>
