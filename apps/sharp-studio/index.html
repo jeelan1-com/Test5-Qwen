@@ -5,10 +5,33 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SharpStudio - C# IDE for Web</title>
     <link rel="stylesheet" href="sharp-studio.css">
+    <link rel="stylesheet" href="../../styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
-    <div class="ide-container">
+    <!-- Navigation Bar -->
+    <nav class="navbar glass-panel" style="position: fixed; top: 0; left: 0; right: 0; z-index: 1000;">
+        <div class="nav-container" style="display: flex; align-items: center; justify-content: space-between; width: 100%; max-width: 1400px; margin: 0 auto; padding: 0 2rem;">
+            <a href="../../index.html" class="logo" style="display: flex; align-items: center; gap: 0.5rem; text-decoration: none; color: var(--text-primary); font-weight: 700; font-size: 1.25rem;">
+                <span>◆</span>
+                <span>NexusHub</span>
+            </a>
+            <ul class="nav-menu" style="display: flex; gap: 2rem; list-style: none; margin: 0; padding: 0;">
+                <li><a href="../../index.html" style="text-decoration: none; color: var(--text-secondary); transition: color 0.2s;">Home</a></li>
+                <li><a href="../../pages/apps.html" style="text-decoration: none; color: var(--text-secondary); transition: color 0.2s;">Apps</a></li>
+                <li><a href="../../pages/news.html" style="text-decoration: none; color: var(--text-secondary); transition: color 0.2s;">News</a></li>
+                <li><a href="../../pages/about.html" style="text-decoration: none; color: var(--text-secondary); transition: color 0.2s;">About</a></li>
+                <li><a href="../../pages/docs.html" style="text-decoration: none; color: var(--text-secondary); transition: color 0.2s;">Docs</a></li>
+                <li><a href="../../pages/contact.html" style="text-decoration: none; color: var(--text-secondary); transition: color 0.2s;">Contact</a></li>
+            </ul>
+            <button class="theme-toggle" id="navThemeToggle" aria-label="Toggle theme" style="background: none; border: none; cursor: pointer; padding: 0.5rem; border-radius: 0.5rem; display: flex; align-items: center; justify-content: center;">
+                <span class="sun-icon">☀️</span>
+                <span class="moon-icon">🌙</span>
+            </button>
+        </div>
+    </nav>
+
+    <div class="ide-container" style="margin-top: 70px;">
         <!-- Title Bar -->
         <div class="title-bar">
             <div class="window-controls">
@@ -404,6 +427,79 @@
     <!-- Hidden file input -->
     <input type="file" id="fileInput" style="display: none;" accept=".cs,.csproj,.sln,.json,.xml,.txt" multiple>
     
+    <!-- Footer -->
+    <footer class="footer" style="margin-top: auto; border-top: 1px solid var(--border-color); padding: 2rem; background: var(--bg-secondary);">
+        <div class="footer-content" style="max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 2rem;">
+            <div>
+                <h4 style="margin-bottom: 0.5rem;">SharpStudio</h4>
+                <p style="font-size: 0.875rem; color: var(--text-secondary);">Professional C# IDE for the web. Build and run C# applications directly in your browser.</p>
+            </div>
+            <div style="display: flex; gap: 2rem;">
+                <div>
+                    <h5 style="margin-bottom: 0.5rem; font-size: 0.875rem;">Quick Links</h5>
+                    <a href="../../index.html" style="display: block; font-size: 0.875rem; color: var(--text-secondary); text-decoration: none; margin-bottom: 0.25rem;">Home</a>
+                    <a href="../../pages/apps.html" style="display: block; font-size: 0.875rem; color: var(--text-secondary); text-decoration: none; margin-bottom: 0.25rem;">Apps</a>
+                    <a href="../../pages/docs.html" style="display: block; font-size: 0.875rem; color: var(--text-secondary); text-decoration: none;">Documentation</a>
+                </div>
+                <div>
+                    <h5 style="margin-bottom: 0.5rem; font-size: 0.875rem;">Resources</h5>
+                    <a href="#" style="display: block; font-size: 0.875rem; color: var(--text-secondary); text-decoration: none; margin-bottom: 0.25rem;">C# Docs</a>
+                    <a href="#" style="display: block; font-size: 0.875rem; color: var(--text-secondary); text-decoration: none; margin-bottom: 0.25rem;">Tutorials</a>
+                    <a href="#" style="display: block; font-size: 0.875rem; color: var(--text-secondary); text-decoration: none;">Support</a>
+                </div>
+            </div>
+            <div>
+                <h5 style="margin-bottom: 0.5rem; font-size: 0.875rem;">Theme</h5>
+                <button class="theme-toggle" id="footerThemeToggle" aria-label="Toggle theme" style="background: var(--bg-tertiary); border: 1px solid var(--border-color); cursor: pointer; padding: 0.5rem 1rem; border-radius: 0.5rem; display: flex; align-items: center; gap: 0.5rem;">
+                    <span class="sun-icon">☀️</span>
+                    <span class="moon-icon">🌙</span>
+                    <span style="font-size: 0.875rem;">Toggle Theme</span>
+                </button>
+            </div>
+        </div>
+        <div style="text-align: center; margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--border-color); font-size: 0.875rem; color: var(--text-secondary);">
+            © 2024 SharpStudio by NexusHub. All rights reserved. | Built with ❤️ using modern web technologies
+        </div>
+    </footer>
+
+    <script src="../../script.js"></script>
     <script src="sharp-studio.js"></script>
+    <script>
+        // Initialize theme toggle for navigation
+        (function() {
+            const navThemeToggle = document.getElementById('navThemeToggle');
+            const footerThemeToggle = document.getElementById('footerThemeToggle');
+            
+            function updateThemeIcons(theme) {
+                const sunIcons = document.querySelectorAll('.sun-icon');
+                const moonIcons = document.querySelectorAll('.moon-icon');
+                if (theme === 'dark') {
+                    sunIcons.forEach(icon => icon.style.display = 'none');
+                    moonIcons.forEach(icon => icon.style.display = 'inline');
+                } else {
+                    sunIcons.forEach(icon => icon.style.display = 'inline');
+                    moonIcons.forEach(icon => icon.style.display = 'none');
+                }
+            }
+            
+            // Load saved theme
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+            updateThemeIcons(savedTheme);
+            
+            // Toggle theme function
+            function toggleTheme() {
+                const html = document.documentElement;
+                const currentTheme = html.getAttribute('data-theme');
+                const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+                html.setAttribute('data-theme', newTheme);
+                localStorage.setItem('theme', newTheme);
+                updateThemeIcons(newTheme);
+            }
+            
+            navThemeToggle?.addEventListener('click', toggleTheme);
+            footerThemeToggle?.addEventListener('click', toggleTheme);
+        })();
+    </script>
 </body>
 </html>

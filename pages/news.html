@@ -329,6 +329,76 @@
         </div>
     </div>
 
+    <!-- Footer -->
+    <footer class="footer" style="margin-top: 4rem; border-top: 1px solid var(--border-color); padding: 3rem 2rem; background: var(--bg-secondary);">
+        <div class="footer-content" style="max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 2rem;">
+            <div>
+                <h4 style="margin-bottom: 0.5rem;">NexusHub News</h4>
+                <p style="font-size: 0.875rem; color: var(--text-secondary);">Stay updated with the latest features, improvements, and announcements.</p>
+            </div>
+            <div style="display: flex; gap: 2rem;">
+                <div>
+                    <h5 style="margin-bottom: 0.5rem; font-size: 0.875rem;">Quick Links</h5>
+                    <a href="../index.html" style="display: block; font-size: 0.875rem; color: var(--text-secondary); text-decoration: none; margin-bottom: 0.25rem;">Home</a>
+                    <a href="apps.html" style="display: block; font-size: 0.875rem; color: var(--text-secondary); text-decoration: none; margin-bottom: 0.25rem;">Apps</a>
+                    <a href="docs.html" style="display: block; font-size: 0.875rem; color: var(--text-secondary); text-decoration: none;">Documentation</a>
+                </div>
+                <div>
+                    <h5 style="margin-bottom: 0.5rem; font-size: 0.875rem;">Resources</h5>
+                    <a href="about.html" style="display: block; font-size: 0.875rem; color: var(--text-secondary); text-decoration: none; margin-bottom: 0.25rem;">About</a>
+                    <a href="contact.html" style="display: block; font-size: 0.875rem; color: var(--text-secondary); text-decoration: none; margin-bottom: 0.25rem;">Contact</a>
+                    <a href="#" style="display: block; font-size: 0.875rem; color: var(--text-secondary); text-decoration: none;">Support</a>
+                </div>
+            </div>
+            <div>
+                <h5 style="margin-bottom: 0.5rem; font-size: 0.875rem;">Theme</h5>
+                <button class="theme-toggle" id="footerThemeToggle" aria-label="Toggle theme" style="background: var(--bg-tertiary); border: 1px solid var(--border-color); cursor: pointer; padding: 0.5rem 1rem; border-radius: 0.5rem; display: flex; align-items: center; gap: 0.5rem;">
+                    <span class="sun-icon">☀️</span>
+                    <span class="moon-icon">🌙</span>
+                    <span style="font-size: 0.875rem;">Toggle Theme</span>
+                </button>
+            </div>
+        </div>
+        <div style="text-align: center; margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--border-color); font-size: 0.875rem; color: var(--text-secondary);">
+            © 2024 NexusHub. All rights reserved. | Built with ❤️ using modern web technologies
+        </div>
+    </footer>
+
     <script src="../script.js"></script>
+    <script>
+        // Initialize footer theme toggle
+        (function() {
+            const footerThemeToggle = document.getElementById('footerThemeToggle');
+            
+            function updateThemeIcons(theme) {
+                const sunIcons = document.querySelectorAll('.sun-icon');
+                const moonIcons = document.querySelectorAll('.moon-icon');
+                if (theme === 'dark') {
+                    sunIcons.forEach(icon => icon.style.display = 'none');
+                    moonIcons.forEach(icon => icon.style.display = 'inline');
+                } else {
+                    sunIcons.forEach(icon => icon.style.display = 'inline');
+                    moonIcons.forEach(icon => icon.style.display = 'none');
+                }
+            }
+            
+            // Load saved theme
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+            updateThemeIcons(savedTheme);
+            
+            // Toggle theme function
+            function toggleTheme() {
+                const html = document.documentElement;
+                const currentTheme = html.getAttribute('data-theme');
+                const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+                html.setAttribute('data-theme', newTheme);
+                localStorage.setItem('theme', newTheme);
+                updateThemeIcons(newTheme);
+            }
+            
+            footerThemeToggle?.addEventListener('click', toggleTheme);
+        })();
+    </script>
 </body>
 </html>
