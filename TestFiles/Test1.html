@@ -1,0 +1,793 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Web C# IDE - Visual Studio Edition</title>
+    
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- RequireJS (Monaco & JSZip Loader) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js"></script>
+
+    <style>
+        /* ========================================= */
+        /* Visual Studio / macOS Dark Theme Basics   */
+        /* ========================================= */
+        :root {
+            --bg-dark: #1e1e1e;
+            --bg-sidebar: #252526;
+            --bg-toolbar: #2d2d2d;
+            --bg-panel: #111111;
+            --border-color: #3e3e42;
+            --text-color: #cccccc;
+            --accent-blue: #007acc;
+            --mac-red: #ff5f56;
+            --mac-yellow: #ffbd2e;
+            --mac-green: #27c93f;
+            --menu-bg: #2d2d2d;
+        }
+
+        * { box-sizing: border-box; }
+        body, html { margin: 0; padding: 0; height: 100%; width: 100%; font-family: "Segoe UI", -apple-system, BlinkMacSystemFont, Roboto, sans-serif; background-color: var(--bg-dark); color: var(--text-color); overflow: hidden; user-select: none; }
+
+        /* Scrollbars */
+        ::-webkit-scrollbar { width: 10px; height: 10px; }
+        ::-webkit-scrollbar-track { background: var(--bg-dark); border-left: 1px solid var(--border-color); }
+        ::-webkit-scrollbar-thumb { background: #464649; border: 2px solid var(--bg-dark); border-radius: 6px; }
+        ::-webkit-scrollbar-thumb:hover { background: #555558; }
+
+        /* Buttons */
+        .btn { padding: 5px 12px; border-radius: 4px; border: 1px solid transparent; cursor: pointer; font-size: 12px; display: inline-flex; align-items: center; gap: 6px; transition: 0.1s; background: transparent; color: #ccc; }
+        .btn:hover { background: #3e3e42; border-color: #555; color: white; }
+        .btn:active { transform: scale(0.97); }
+        .btn-primary { background-color: var(--accent-blue); color: white; border-color: var(--accent-blue); }
+        .btn-primary:hover { background-color: #005f9e; }
+        .btn-success { background-color: #1f8035; color: white; border-color: #1f8035; }
+        .btn-success:hover { background-color: #165c26; }
+        .btn-danger { background-color: #dc3545; color: white; width: 100%; justify-content: center; margin-top: 10px; }
+
+        /* Title Bar & Menu */
+        #title-bar { height: 32px; background: #181818; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #000; }
+        .mac-traffic-lights { display: flex; gap: 8px; padding-left: 12px; }
+        .mac-traffic-lights div { width: 12px; height: 12px; border-radius: 50%; cursor: pointer; }
+        .light-red { background: var(--mac-red); } .light-yellow { background: var(--mac-yellow); } .light-green { background: var(--mac-green); }
+
+        #top-menu-bar { height: 28px; background-color: var(--menu-bg); display: flex; align-items: center; padding: 0 5px; font-size: 13px; z-index: 100; position: relative; }
+        .menu-item { cursor: pointer; padding: 4px 8px; border-radius: 3px; position: relative; color: #ccc; }
+        .menu-item:hover { background-color: #3e3e42; color: white; }
+        .dropdown { display: none; position: absolute; top: 100%; left: 0; background: #252526; border: 1px solid #444; box-shadow: 0 4px 15px rgba(0,0,0,0.5); padding: 4px 0; min-width: 240px; z-index: 1000; }
+        .menu-item:hover .dropdown { display: flex; flex-direction: column; }
+        .dropdown-item { padding: 6px 15px; display: flex; justify-content: space-between; font-size: 12px; color: #ccc; }
+        .dropdown-item:hover { background-color: var(--accent-blue); color: white; }
+        .dropdown-divider { border-top: 1px solid #444; margin: 4px 0; }
+
+        /* Toolbar */
+        #toolbar { height: 35px; background-color: #2d2d2d; display: flex; align-items: center; padding: 0 10px; border-bottom: 1px solid var(--border-color); gap: 10px; }
+
+        /* Layout */
+        #ide-container { display: none; flex-direction: column; height: 100vh; }
+        #workspace { display: flex; flex: 1; overflow: hidden; }
+        .sidebar { width: 280px; background-color: var(--bg-sidebar); display: flex; flex-direction: column; }
+        #sidebar-left { border-right: 1px solid var(--border-color); }
+        #sidebar-right { border-left: 1px solid var(--border-color); }
+        .panel-header { background-color: #252526; padding: 6px 12px; font-size: 12px; font-weight: 600; border-bottom: 1px solid var(--border-color); color: #ccc; display: flex; justify-content: space-between; align-items: center; }
+        .panel-body { flex: 1; overflow-y: auto; padding: 0; }
+
+        /* Editor Area */
+        #center-area { flex: 1; display: flex; flex-direction: column; background-color: var(--bg-dark); }
+        #tabs-bar { height: 35px; background-color: #2d2d2d; display: flex; overflow-x: auto; }
+        .tab { padding: 0 12px; display: flex; align-items: center; font-size: 12px; color: #999; background-color: #2d2d2d; border-right: 1px solid #1e1e1e; cursor: pointer; gap: 6px; }
+        .tab.active { background-color: var(--bg-dark); color: #007acc; border-top: 2px solid #007acc; }
+        .tab:hover:not(.active) { background-color: #1e1e1e; }
+        #monaco-wrapper { flex: 1; display: block; }
+
+        /* Solution Explorer */
+        .vs-tree-item { font-size: 13px; padding: 4px 10px; cursor: pointer; display: flex; align-items: center; gap: 6px; color: #ccc; }
+        .vs-tree-item:hover { background-color: #2a2d2e; }
+        .vs-tree-item.active { background-color: #37373d; color: white; }
+        .indent-1 { padding-left: 24px; }
+        .indent-2 { padding-left: 42px; }
+        .icon-sln { color: #007acc; } .icon-proj { color: #512bd4; } .icon-cs { color: #178600; } .icon-form { color: #d15c00; }
+
+        /* Toolbox */
+        .toolbox-item { font-size: 12px; padding: 6px 15px; cursor: pointer; display: flex; align-items: center; gap: 8px; }
+        .toolbox-item:hover { background-color: #3e3e42; }
+        .toolbox-cat { background: #2d2d2d; padding: 4px 10px; font-size: 11px; font-weight: bold; color: #ccc; border-bottom: 1px solid #1e1e1e; border-top: 1px solid #3e3e42; }
+
+        /* Properties Grid */
+        .prop-row { display: flex; font-size: 12px; border-bottom: 1px solid #333; }
+        .prop-name { width: 40%; color: #bbb; padding: 4px 8px; border-right: 1px solid #333; background: #252526; }
+        .prop-val { width: 60%; background: #1e1e1e; }
+        .prop-val input, .prop-val select { width: 100%; background: transparent; border: none; color: white; font-size: 12px; padding: 4px; outline: none; }
+        .prop-val input:focus { background: #3e3e42; }
+
+        /* Bottom Panel */
+        #bottom-area { height: 220px; background-color: var(--bg-panel); border-top: 1px solid var(--border-color); display: flex; flex-direction: column; }
+        .bottom-tabs { display: flex; background: #2d2d2d; }
+        .btm-tab { padding: 4px 15px; font-size: 12px; color: #ccc; cursor: pointer; border-right: 1px solid #1e1e1e; border-top: 2px solid transparent; }
+        .btm-tab.active { background: var(--bg-panel); color: white; border-top: 2px solid var(--accent-blue); }
+        .panel-content { flex: 1; padding: 10px; font-family: "Consolas", monospace; font-size: 13px; overflow-y: auto; display: none; }
+        .panel-content.active { display: block; }
+        #output-content { color: #fff; } #notify-content { color: #aaa; }
+        .log-err { color: #f48771; } .log-succ { color: #89d185; }
+
+        /* Status Bar */
+        #status-bar { height: 24px; background-color: #007acc; display: flex; align-items: center; justify-content: space-between; padding: 0 10px; font-size: 12px; color: white; }
+        .status-btn { background: #dc3545; padding: 2px 8px; border-radius: 2px; cursor: pointer; font-weight: bold; display: none; }
+        .status-btn:hover { background: #c82333; }
+
+        /* Modals */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 9999; display: none; align-items: center; justify-content: center; }
+        .modal-box { background-color: #252526; border: 1px solid #444; box-shadow: 0 15px 40px rgba(0,0,0,0.5); display: flex; flex-direction: column; width: 600px; overflow: hidden; }
+        .modal-header { padding: 10px 15px; background: #2d2d2d; font-size: 16px; font-weight: 300; border-bottom: 1px solid #444; }
+
+        /* ========================================= */
+        /* Windows 11 Fluent Design Canvas           */
+        /* ========================================= */
+        #designer-wrapper { flex: 1; display: none; background-color: #1e1e1e; position: relative; overflow: auto; align-items: center; justify-content: center; background-image: radial-gradient(#333 1px, transparent 1px); background-size: 15px 15px; }
+        #winforms-canvas { width: 550px; height: 400px; background-color: #f3f3f3; border: 1px solid #000; box-shadow: 0 12px 32px rgba(0,0,0,0.5); position: relative; font-family: 'Segoe UI', sans-serif; border-radius: 8px; overflow: hidden; }
+        #winforms-canvas-title { background: #e0e0e0; color: #1a1a1a; font-size: 12px; padding: 8px; text-align: center; border-bottom: 1px solid #ccc; font-weight: bold; }
+        .designer-ctrl { position: absolute; cursor: move; padding: 0; border: 1px dashed transparent; user-select: none; display: flex; align-items: center; justify-content: center; }
+        .designer-ctrl:hover { border: 1px dashed #005fb8; }
+        .designer-ctrl.selected { border: 1px dashed #ff453a; outline: 1px solid rgba(255,69,58,0.3); }
+
+        #run-app-window { position: absolute; top: 120px; left: 350px; width: 550px; height: 400px; background-color: #f3f3f3; border-radius: 8px; box-shadow: 0 20px 50px rgba(0,0,0,0.6); display: none; z-index: 10000; border: 1px solid rgba(0,0,0,0.2); flex-direction: column; font-family: 'Segoe UI', sans-serif; }
+        .run-app-header { background: #e0e0e0; padding: 10px; border-bottom: 1px solid #ccc; display: flex; justify-content: space-between; align-items: center; cursor: grab; border-radius: 8px 8px 0 0; }
+        .run-app-close { background: #e81123; color: white; border-radius: 4px; width: 25px; height: 25px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 12px; transition: 0.1s; }
+        .run-app-close:hover { background: #f1707a; }
+        #run-app-canvas { flex: 1; position: relative; overflow: hidden; }
+
+        /* Controls UI */
+        .w11-btn { background: #fdfdfd; border: 1px solid #d1d1d1; border-bottom-color: #b3b3b3; border-radius: 4px; padding: 4px 12px; font-size: 12px; cursor: pointer; color: #1a1a1a; }
+        .w11-btn:active { background: #ebebeb; }
+        .w11-txt { background: #ffffff; border: 1px solid #d1d1d1; border-radius: 4px; padding: 4px 8px; font-size: 12px; width: 100px; color: #1a1a1a; }
+        .w11-lbl { font-size: 12px; color: #1a1a1a; }
+        .w11-chk { display: flex; align-items: center; gap: 5px; font-size: 12px; color: #1a1a1a; }
+        .w11-cbx { font-size: 12px; padding: 3px; border-radius: 4px; border: 1px solid #d1d1d1; width: 100px; }
+        .w11-prog { width: 100px; height: 15px; border-radius: 8px; background: #e0e0e0; overflow: hidden; border: 1px solid #ccc; }
+        .w11-prog-fill { width: 50%; height: 100%; background: #0078D4; }
+        .w11-pic { width: 80px; height: 60px; background: #e6e6e6; border: 1px dashed #aaa; display: flex; align-items: center; justify-content: center; font-size: 20px; color: #888; }
+        .designer-ctrl * { pointer-events: none; } 
+    </style>
+</head>
+<body>
+
+    <!-- STARTUP WIZARD -->
+    <div id="startup-wizard" class="modal-overlay">
+        <div class="modal-box">
+            <div class="modal-header">Create a new project</div>
+            <div style="display: flex; height: 320px;">
+                <div style="width: 45%; border-right: 1px solid #444; background: #1e1e1e; overflow-y:auto;">
+                    <div class="vs-tree-item" style="padding: 15px;" onclick="selectProj('console')" id="wiz-console">
+                        <i class="fa-solid fa-terminal icon-cs" style="font-size: 24px; margin-right: 10px;"></i>
+                        <div><b>Console App</b><br><span style="font-size:11px; color:#888;">A project to create a command-line application.</span></div>
+                    </div>
+                    <div class="vs-tree-item" style="padding: 15px;" onclick="selectProj('winforms')" id="wiz-winforms">
+                        <i class="fa-brands fa-windows icon-sln" style="font-size: 24px; margin-right: 10px;"></i>
+                        <div><b>Windows Forms App</b><br><span style="font-size:11px; color:#888;">A project for creating an app with a Windows UI.</span></div>
+                    </div>
+                </div>
+                <div style="width: 55%; padding: 20px; display: flex; flex-direction: column; gap: 15px; background: #252526;">
+                    <div><label style="font-size: 13px; color: #ccc;">Project name</label><br>
+                    <input type="text" id="wiz-name" value="ConsoleApp1" style="width:100%; padding: 6px; background: #333; border: 1px solid #555; color: white; margin-top: 5px;"></div>
+                    <div><label style="font-size: 13px; color: #ccc;">Framework</label><br>
+                    <select style="width:100%; padding: 6px; background: #333; border: 1px solid #555; color: white; margin-top: 5px;">
+                        <option>.NET 8.0 (Long Term Support)</option>
+                    </select></div>
+                </div>
+            </div>
+            <div style="padding: 12px; background: #2d2d2d; text-align: right; border-top: 1px solid #444;">
+                <button class="btn btn-primary" style="padding: 6px 20px;" onclick="createNewProject()">Create</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- EXECUTING APP WINDOW (WIN11 SIMULATION) -->
+    <div id="run-app-window">
+        <div class="run-app-header" id="run-app-drag">
+            <div style="display:flex; gap:8px; align-items:center;">
+                <i class="fa-brands fa-windows" style="color:#0078D4;"></i>
+                <span id="run-app-title" style="font-size: 12px; color: #1a1a1a;">Form1</span>
+            </div>
+            <div class="run-app-close" onclick="stopDebugging()"><i class="fa-solid fa-xmark"></i></div>
+        </div>
+        <div id="run-app-canvas"></div>
+    </div>
+
+    <!-- MAIN IDE -->
+    <div id="ide-container">
+        <!-- macOS Title Bar -->
+        <div id="title-bar">
+            <div class="mac-traffic-lights">
+                <div class="light-red" onclick="closeProject()"></div>
+                <div class="light-yellow"></div>
+                <div class="light-green"></div>
+            </div>
+            <div style="font-size: 12px; color: #aaa;" id="ide-title">Project - Visual Studio</div>
+            <div style="width: 60px;"></div>
+        </div>
+
+        <!-- Menu Bar -->
+        <div id="top-menu-bar">
+            <div class="menu-item">File
+                <div class="dropdown">
+                    <div class="dropdown-item" onclick="forceSave()"><span><i class="fa-solid fa-floppy-disk"></i> Save All</span></div>
+                    <div class="dropdown-divider"></div>
+                    <div class="dropdown-item" onclick="compileToNativeVS()"><span><i class="fa-solid fa-file-zipper"></i> Export Native VS Project</span></div>
+                    <div class="dropdown-divider"></div>
+                    <div class="dropdown-item" style="color: var(--mac-red);" onclick="closeProject()"><span>Close Solution</span></div>
+                </div>
+            </div>
+            <div class="menu-item">Build
+                <div class="dropdown">
+                    <div class="dropdown-item" onclick="runProject()"><span>Build Solution</span></div>
+                    <div class="dropdown-item" onclick="compileToNativeVS()"><span>Compile to Native (.zip)</span></div>
+                </div>
+            </div>
+            <div class="menu-item">Debug
+                <div class="dropdown">
+                    <div class="dropdown-item" onclick="runProject()"><span><i class="fa-solid fa-play" style="color:#1f8035"></i> Start Debugging</span></div>
+                    <div class="dropdown-item" onclick="stopDebugging()"><span><i class="fa-solid fa-stop" style="color:#dc3545"></i> Stop Debugging</span></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Toolbar -->
+        <div id="toolbar">
+            <button class="btn btn-success" onclick="runProject()"><i class="fa-solid fa-play"></i> Start</button>
+            <button class="btn" onclick="compileToNativeVS()" style="color:#c586c0;"><i class="fa-solid fa-code"></i> Export VS Project</button>
+        </div>
+
+        <!-- Workspace -->
+        <div id="workspace">
+            <div class="sidebar" id="sidebar-left">
+                <div class="panel-header">Toolbox <i class="fa-solid fa-wrench"></i></div>
+                <div class="panel-body">
+                    <div class="toolbox-cat">Common Windows Forms</div>
+                    <div id="toolbox-list"></div>
+                </div>
+            </div>
+
+            <div id="center-area">
+                <div id="tabs-bar"></div>
+                
+                <div id="monaco-wrapper"></div>
+
+                <div id="designer-wrapper">
+                    <div style="position:absolute; top:10px; right:20px; display:flex; gap:5px; z-index:10;">
+                        <button class="btn btn-primary" onclick="zoomDesigner(0.1)"><i class="fa-solid fa-magnifying-glass-plus"></i></button>
+                        <button class="btn btn-primary" onclick="zoomDesigner(-0.1)"><i class="fa-solid fa-magnifying-glass-minus"></i></button>
+                        <button class="btn btn-primary" onclick="zoomDesigner(0, true)"><i class="fa-solid fa-compress"></i></button>
+                    </div>
+                    <div id="designer-zoom-area" style="transform-origin: center center; transition: transform 0.2s;">
+                        <div id="winforms-canvas" ondrop="dropControl(event)" ondragover="allowDrop(event)" onclick="deselectAll(event)">
+                            <div id="winforms-canvas-title">Form1</div>
+                            <div id="canvas-controls"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="sidebar" id="sidebar-right">
+                <div class="panel-header">Solution Explorer <i class="fa-solid fa-list-tree"></i></div>
+                <div class="panel-body" style="height: 45%; border-bottom: 1px solid #333;" id="solution-explorer"></div>
+                
+                <div class="panel-header">Properties <i class="fa-solid fa-sliders"></i></div>
+                <div class="panel-body" id="properties-grid" style="background:#252526;">
+                    <div style="color:#666; text-align:center; margin-top:20px; font-size:12px;">No control selected.</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bottom Panel -->
+        <div id="bottom-area">
+            <div class="bottom-tabs">
+                <div class="btm-tab active" onclick="switchBottomTab('output')" id="tab-output">Output</div>
+                <div class="btm-tab" onclick="switchBottomTab('notify')" id="tab-notify">Notifications</div>
+            </div>
+            <div id="output-content" class="panel-content active"></div>
+            <div id="notify-content" class="panel-content">System Ready.<br></div>
+        </div>
+
+        <!-- Status Bar -->
+        <div id="status-bar">
+            <div style="display:flex; gap:15px; align-items:center;">
+                <span id="status-text">Ready</span>
+                <div class="status-btn" id="stop-btn" onclick="stopDebugging()"><i class="fa-solid fa-stop"></i> Stop</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT ENGINE -->
+    <script>
+        // ==========================================
+        // REQUIRE.JS CONFIGURATION & MONACO
+        // ==========================================
+        require.config({
+            paths: {
+                'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.39.0/min/vs',
+                'jszip': 'https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min'
+            }
+        });
+
+        // ==========================================
+        // GLOBAL STATE & DATA
+        // ==========================================
+        let editor = null;
+        let monacoModels = {}; // Stores the persistent Monaco URI models for cross-file connection
+        let isRunning = false;
+        let zoomLevel = 1.0;
+        
+        let state = {
+            loaded: false, projName: '', projType: 'console', activeTab: '', openTabs: [], files: {}, controls:[], counter: 0
+        };
+
+        const templates = {
+            console: {
+                'Program.cs': `using System;\n\nnamespace NativeApp\n{\n    internal class Program\n    {\n        static void Main(string[] args)\n        {\n            Console.WriteLine("Hello, World!");\n        }\n    }\n}`
+            },
+            winforms: {
+                'Program.cs': `using System;\nusing System.Windows.Forms;\n\nnamespace NativeApp\n{\n    internal static class Program\n    {\n        [STAThread]\n        static void Main()\n        {\n            Application.EnableVisualStyles();\n            Application.SetCompatibleTextRenderingDefault(false);\n            Application.Run(new Form1());\n        }\n    }\n}`,
+                'Form1.cs': `using System;\nusing System.Windows.Forms;\n\nnamespace NativeApp\n{\n    public partial class Form1 : Form\n    {\n        public Form1()\n        {\n            InitializeComponent();\n        }\n    }\n}`,
+                'Form1.Designer.cs': `// Auto-generated by Web IDE Compiler`
+            }
+        };
+
+        const toolboxData =[
+            { name: 'Button', icon: 'fa-square' }, { name: 'TextBox', icon: 'fa-font' },
+            { name: 'Label', icon: 'fa-a' }, { name: 'CheckBox', icon: 'fa-check-square' },
+            { name: 'ComboBox', icon: 'fa-caret-down' }, { name: 'RadioButton', icon: 'fa-circle-dot' },
+            { name: 'ProgressBar', icon: 'fa-bars-progress' }, { name: 'PictureBox', icon: 'fa-image' }
+        ];
+
+        // ==========================================
+        // BOOT LOGIC & WIZARD
+        // ==========================================
+        window.onload = () => {
+            const savedState = localStorage.getItem('webVS_IDE');
+            if (savedState) {
+                try { state = JSON.parse(savedState); if (state.loaded) { launchIDE(true); return; } } catch(e) {}
+            }
+            document.getElementById('startup-wizard').style.display = 'flex';
+            selectProj('console'); // Default selection
+        };
+
+        window.addEventListener('beforeunload', function (e) { if (state.loaded) forceSave(); });
+
+        function selectProj(type) {
+            state.projType = type;
+            document.getElementById('wiz-console').style.background = type === 'console' ? '#37373d' : 'transparent';
+            document.getElementById('wiz-winforms').style.background = type === 'winforms' ? '#37373d' : 'transparent';
+            document.getElementById('wiz-name').value = type === 'console' ? "ConsoleApp1" : "WinFormsApp1";
+        }
+
+        function createNewProject() {
+            state.projName = document.getElementById('wiz-name').value || "App1";
+            state.loaded = true; state.controls =[]; state.counter = 0;
+            monacoModels = {}; // Reset models
+            
+            if (state.projType === 'console') { 
+                state.files = { ...templates.console }; 
+                state.openTabs = ['Program.cs']; 
+                state.activeTab = 'Program.cs'; 
+            } else { 
+                state.files = { ...templates.winforms }; 
+                state.openTabs =['Form1.cs [Design]', 'Form1.cs']; 
+                state.activeTab = 'Form1.cs'; // Open code by default behind design
+            }
+            
+            document.getElementById('startup-wizard').style.display = 'none';
+            launchIDE(false);
+            
+            // If winforms, ensure the design tab is the visual active one initially
+            if(state.projType === 'winforms') switchTab('Form1.cs [Design]');
+        }
+
+        function closeProject() {
+            if(!confirm("Close solution? Make sure you have exported your native code if needed.")) return;
+            state.loaded = false; localStorage.removeItem('webVS_IDE');
+            document.getElementById('ide-container').style.display = 'none';
+            document.getElementById('startup-wizard').style.display = 'flex';
+            document.getElementById('output-content').innerHTML = '';
+            document.getElementById('notify-content').innerHTML = 'System Ready.<br>';
+            if(editor) editor.setModel(null);
+            monacoModels = {};
+        }
+
+        function forceSave() {
+            // Pull latest from monaco models back into state
+            for(let filename in monacoModels) {
+                state.files[filename] = monacoModels[filename].getValue();
+            }
+            localStorage.setItem('webVS_IDE', JSON.stringify(state));
+            notifyTerminal("Project saved successfully.");
+        }
+
+        // ==========================================
+        // IDE UI & MONACO SETUP
+        // ==========================================
+        function launchIDE(isRestoring) {
+            document.getElementById('ide-container').style.display = 'flex';
+            document.getElementById('ide-title').innerText = `${state.projName} - Visual Studio`;
+
+            renderSolutionExplorer();
+            renderToolbox();
+            renderTabs();
+            renderDesigner();
+
+            if (!editor) {
+                require(['vs/editor/editor.main', 'jszip'], function(monaco, JSZipLib) {
+                    window.JSZip = JSZipLib; 
+                    
+                    // Add basic completion for simulated functions
+                    monaco.languages.registerCompletionItemProvider('csharp', {
+                        provideCompletionItems: function() {
+                            return { suggestions:[
+                                { label: 'MessageBox.Show', kind: monaco.languages.CompletionItemKind.Method, insertText: 'MessageBox.Show("${1:Message}");', insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet },
+                                { label: 'Console.WriteLine', kind: monaco.languages.CompletionItemKind.Method, insertText: 'Console.WriteLine(${1});', insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet }
+                            ]};
+                        }
+                    });
+
+                    editor = monaco.editor.create(document.getElementById('monaco-wrapper'), {
+                        theme: 'vs-dark', automaticLayout: true, fontSize: 13, minimap: { enabled: false }
+                    });
+
+                    initializeMonacoModels();
+                    switchTab(state.activeTab);
+                    if (isRestoring) notifyTerminal("Session Restored.");
+                });
+            } else {
+                initializeMonacoModels();
+                switchTab(state.activeTab);
+            }
+        }
+
+        // Create virtual files in Monaco so they share a context!
+        function initializeMonacoModels() {
+            for(let filename in state.files) {
+                if(!monacoModels[filename]) {
+                    const uri = monaco.Uri.parse(`file:///${filename}`);
+                    monacoModels[filename] = monaco.editor.createModel(state.files[filename], 'csharp', uri);
+                } else {
+                    monacoModels[filename].setValue(state.files[filename]);
+                }
+            }
+        }
+
+        // UI RENDERERS
+        function renderSolutionExplorer() {
+            const exp = document.getElementById('solution-explorer');
+            exp.innerHTML = `
+                <div class="vs-tree-item"><i class="fa-solid fa-box icon-sln"></i> Solution '${state.projName}' (1 of 1 project)</div>
+                <div class="vs-tree-item indent-1"><i class="fa-brands fa-windows icon-proj"></i> ${state.projName}</div>
+                <div class="vs-tree-item indent-2"><i class="fa-solid fa-wrench" style="color:#aaa;"></i> Properties</div>
+                <div class="vs-tree-item indent-2"><i class="fa-solid fa-link" style="color:#aaa;"></i> References</div>
+            `;
+            if (state.projType === 'winforms') exp.innerHTML += `<div class="vs-tree-item indent-2" onclick="openTab('Form1.cs [Design]')"><i class="fa-solid fa-table-cells-large icon-form"></i> Form1.cs [Design]</div>`;
+            for (let fileName in state.files) {
+                if(fileName !== 'Form1.Designer.cs') 
+                    exp.innerHTML += `<div class="vs-tree-item indent-2" onclick="openTab('${fileName}')"><i class="fa-solid fa-file-code icon-cs"></i> ${fileName}</div>`;
+            }
+        }
+
+        function renderToolbox() {
+            const tb = document.getElementById('toolbox-list');
+            if (state.projType === 'console') { tb.innerHTML = "<div style='color:#666; font-size:11px; padding:10px;'>There are no usable controls in this group. Drag an item onto this text to add it to the toolbox.</div>"; return; }
+            tb.innerHTML = '';
+            toolboxData.forEach(item => {
+                let div = document.createElement('div'); div.className = 'toolbox-item';
+                div.innerHTML = `<i class="fa-solid ${item.icon}" style="width:16px; text-align:center;"></i> ${item.name}`;
+                div.draggable = true; div.ondragstart = (e) => e.dataTransfer.setData("ctrlType", item.name);
+                tb.appendChild(div);
+            });
+        }
+
+        function renderTabs() {
+            const tbar = document.getElementById('tabs-bar');
+            tbar.innerHTML = '';
+            state.openTabs.forEach(tab => {
+                let div = document.createElement('div');
+                div.className = `tab ${tab === state.activeTab ? 'active' : ''}`;
+                div.innerHTML = `${tab.includes('Design') ? '<i class="fa-solid fa-table-cells-large" style="color:#d15c00;"></i>' : '<i class="fa-solid fa-file-code" style="color:#178600;"></i>'} ${tab} <span style="margin-left:8px;" onclick="closeTab(event, '${tab}')"><i class="fa-solid fa-xmark"></i></span>`;
+                div.onclick = () => switchTab(tab);
+                tbar.appendChild(div);
+            });
+        }
+
+        function openTab(tabName) { if (!state.openTabs.includes(tabName)) state.openTabs.push(tabName); switchTab(tabName); }
+        function closeTab(e, tabName) {
+            e.stopPropagation(); state.openTabs = state.openTabs.filter(t => t !== tabName);
+            if (state.activeTab === tabName) switchTab(state.openTabs.length > 0 ? state.openTabs[state.openTabs.length - 1] : ''); else renderTabs();
+        }
+
+        function switchTab(tabName) {
+            state.activeTab = tabName; renderTabs();
+            const isDesign = tabName.includes('[Design]');
+            
+            document.getElementById('monaco-wrapper').style.display = isDesign || tabName === '' ? 'none' : 'block';
+            document.getElementById('designer-wrapper').style.display = isDesign ? 'flex' : 'none';
+            
+            // Use Monaco Models instead of raw text value!
+            if (!isDesign && tabName !== '' && editor && monacoModels[tabName]) {
+                editor.setModel(monacoModels[tabName]);
+            }
+        }
+
+        // ==========================================
+        // DESIGNER & DRAG DROP
+        // ==========================================
+        function allowDrop(ev) { ev.preventDefault(); }
+        function deselectAll(ev) {
+            if (ev.target.id === 'winforms-canvas' || ev.target.id === 'designer-zoom-area') {
+                document.querySelectorAll('.designer-ctrl').forEach(c => c.classList.remove('selected'));
+                document.getElementById('properties-grid').innerHTML = `<div style="color:#666; text-align:center; margin-top:20px;">No control selected.</div>`;
+            }
+        }
+        function dropControl(ev) {
+            ev.preventDefault();
+            const type = ev.dataTransfer.getData("ctrlType");
+            if (!type) return;
+            const rect = document.getElementById('winforms-canvas').getBoundingClientRect();
+            const x = (ev.clientX - rect.left) / zoomLevel;
+            const y = (ev.clientY - rect.top) / zoomLevel;
+
+            state.counter++;
+            state.controls.push({
+                id: `${type.toLowerCase()}${state.counter}`, type: type,
+                x: Math.max(0, Math.floor(x - 20)), y: Math.max(30, Math.floor(y - 10)), text: `${type}${state.counter}`
+            });
+            renderDesigner(); forceSave();
+        }
+
+        function getHtmlForControl(type, text, isRunMode = false) {
+            let cls = isRunMode ? "" : "pointer-events:none;";
+            switch(type) {
+                case 'Button': return `<button class="w11-btn" style="${cls}">${text}</button>`;
+                case 'TextBox': return `<input type="text" class="w11-txt" value="${text}" style="${cls}">`;
+                case 'Label': return `<span class="w11-lbl" style="${cls}">${text}</span>`;
+                case 'CheckBox': return `<div class="w11-chk" style="${cls}"><input type="checkbox"> ${text}</div>`;
+                case 'ComboBox': return `<select class="w11-cbx" style="${cls}"><option>${text}</option></select>`;
+                case 'RadioButton': return `<div class="w11-chk" style="${cls}"><input type="radio"> ${text}</div>`;
+                case 'ProgressBar': return `<div class="w11-prog" style="${cls}"><div class="w11-prog-fill"></div></div>`;
+                case 'PictureBox': return `<div class="w11-pic" style="${cls}"><i class="fa-regular fa-image"></i></div>`;
+                default: return `<span class="w11-lbl">${text}</span>`;
+            }
+        }
+
+        function renderDesigner() {
+            const container = document.getElementById('canvas-controls');
+            container.innerHTML = '';
+            state.controls.forEach(ctrl => {
+                let el = document.createElement('div');
+                el.className = 'designer-ctrl'; el.style.left = ctrl.x + 'px'; el.style.top = ctrl.y + 'px'; el.id = 'dsg_' + ctrl.id;
+                el.innerHTML = getHtmlForControl(ctrl.type, ctrl.text, false);
+                el.onmousedown = (e) => startDrag(e, ctrl, el);
+                el.ondblclick = (e) => { e.stopPropagation(); generateEventCode(ctrl); };
+                container.appendChild(el);
+            });
+        }
+
+        function startDrag(e, ctrl, el) {
+            e.stopPropagation(); selectControl(ctrl);
+            let startX = e.clientX, startY = e.clientY, initialX = ctrl.x, initialY = ctrl.y;
+            function onMouseMove(me) {
+                ctrl.x = Math.max(0, Math.floor(initialX + (me.clientX - startX) / zoomLevel));
+                ctrl.y = Math.max(30, Math.floor(initialY + (me.clientY - startY) / zoomLevel));
+                el.style.left = ctrl.x + 'px'; el.style.top = ctrl.y + 'px';
+                if(document.getElementById('prop-x')) { document.getElementById('prop-x').value = ctrl.x; document.getElementById('prop-y').value = ctrl.y; }
+            }
+            function onMouseUp() { document.removeEventListener('mousemove', onMouseMove); document.removeEventListener('mouseup', onMouseUp); forceSave(); }
+            document.addEventListener('mousemove', onMouseMove); document.addEventListener('mouseup', onMouseUp);
+        }
+
+        function selectControl(ctrl) {
+            document.querySelectorAll('.designer-ctrl').forEach(c => c.classList.remove('selected'));
+            document.getElementById('dsg_' + ctrl.id).classList.add('selected');
+            const grid = document.getElementById('properties-grid');
+            grid.innerHTML = `
+                <div style="font-weight:bold; font-size:12px; margin-bottom:10px; color:var(--accent-blue); padding:10px;">${ctrl.id} System.Windows.Forms.${ctrl.type}</div>
+                <div class="prop-row"><div class="prop-name">(Name)</div><div class="prop-val"><input type="text" readonly value="${ctrl.id}"></div></div>
+                <div class="prop-row"><div class="prop-name">Text</div><div class="prop-val"><input type="text" id="prop-text" value="${ctrl.text}"></div></div>
+                <div class="prop-row"><div class="prop-name">Location X</div><div class="prop-val"><input type="number" id="prop-x" value="${ctrl.x}"></div></div>
+                <div class="prop-row"><div class="prop-name">Location Y</div><div class="prop-val"><input type="number" id="prop-y" value="${ctrl.y}"></div></div>
+                <div style="padding:10px;"><button class="btn btn-danger" onclick="deleteControl('${ctrl.id}')">Delete</button></div>
+            `;
+            document.getElementById('prop-text').oninput = (e) => { ctrl.text = e.target.value; renderDesigner(); forceSave(); };
+            document.getElementById('prop-x').oninput = (e) => { ctrl.x = parseInt(e.target.value); renderDesigner(); forceSave(); };
+            document.getElementById('prop-y').oninput = (e) => { ctrl.y = parseInt(e.target.value); renderDesigner(); forceSave(); };
+        }
+
+        function deleteControl(id) { state.controls = state.controls.filter(c => c.id !== id); renderDesigner(); document.getElementById('properties-grid').innerHTML = ''; forceSave(); }
+        function zoomDesigner(amt, reset = false) { zoomLevel = reset ? 1.0 : Math.max(0.5, Math.min(2.0, zoomLevel + amt)); document.getElementById('designer-zoom-area').style.transform = `scale(${zoomLevel})`; }
+
+        function generateEventCode(ctrl) {
+            let eventName = (ctrl.type === 'TextBox') ? "TextChanged" : 'Click';
+            let methodName = `${ctrl.id}_${eventName}`;
+            let code = monacoModels['Form1.cs'].getValue();
+            
+            if (!code.includes(methodName)) {
+                let handlerCode = `\n        private void ${methodName}(object sender, EventArgs e)\n        {\n            \n        }\n`;
+                let classBrace = code.lastIndexOf('}', code.lastIndexOf('}') - 1);
+                if (classBrace !== -1) { 
+                    code = code.substring(0, classBrace) + handlerCode + code.substring(classBrace); 
+                    monacoModels['Form1.cs'].setValue(code); 
+                }
+            }
+            openTab('Form1.cs'); 
+        }
+
+        // ==========================================
+        // EXPORT TO NATIVE VISUAL STUDIO (.ZIP)
+        // ==========================================
+        function compileToNativeVS() {
+            if(!window.JSZip) { notifyTerminal("Compiler engine not ready.", "err"); return; }
+            forceSave();
+            notifyTerminal("Starting Native Visual Studio Project Compilation...");
+            
+            const zip = new window.JSZip();
+            const root = zip.folder(state.projName);
+
+            const csProjType = state.projType === 'console' ? "Exe" : "WinExe";
+            const csProj = `<Project Sdk="Microsoft.NET.Sdk">\n  <PropertyGroup>\n    <OutputType>${csProjType}</OutputType>\n    <TargetFramework>net8.0-windows</TargetFramework>\n    ${state.projType === 'winforms' ? '<UseWindowsForms>true</UseWindowsForms>' : ''}\n    <ImplicitUsings>enable</ImplicitUsings>\n    <Nullable>enable</Nullable>\n  </PropertyGroup>\n</Project>`;
+            root.file(`${state.projName}.csproj`, csProj);
+
+            root.file("Program.cs", state.files['Program.cs']);
+            
+            if (state.projType === 'winforms') {
+                root.file("Form1.cs", state.files['Form1.cs']);
+                let decl = "", init = "";
+                state.controls.forEach(c => {
+                    let type = `System.Windows.Forms.${c.type}`;
+                    decl += `private ${type} ${c.id};\n        `;
+                    init += `this.${c.id} = new ${type}();\n            this.${c.id}.Location = new System.Drawing.Point(${c.x}, ${c.y});\n            this.${c.id}.Name = "${c.id}";\n            this.${c.id}.Text = "${c.text}";\n            `;
+                    if(c.type === 'Button') init += `this.${c.id}.Size = new System.Drawing.Size(75, 23);\n            `;
+                    init += `this.Controls.Add(this.${c.id});\n            \n            `;
+                });
+                root.file("Form1.Designer.cs", `namespace NativeApp\n{\n    partial class Form1\n    {\n        private System.ComponentModel.IContainer components = null;\n        protected override void Dispose(bool disposing) { if (disposing && (components != null)) components.Dispose(); base.Dispose(disposing); }\n        private void InitializeComponent() { ${init} this.Text = "Form1"; this.ClientSize = new System.Drawing.Size(484, 311); }\n        ${decl}\n    }\n}`);
+            }
+
+            zip.generateAsync({type:"blob"}).then(function(content) {
+                const a = document.createElement("a"); a.href = URL.createObjectURL(content); a.download = `${state.projName}_VS_Project.zip`; a.click();
+                notifyTerminal(`Successfully compiled to Native -> ${state.projName}_VS_Project.zip`);
+            });
+        }
+
+        // ==========================================
+        // C# EXECUTION ENGINE (Real Parsing Sim)
+        // ==========================================
+        function runProject() {
+            if (isRunning) return;
+            forceSave();
+            
+            document.getElementById('stop-btn').style.display = 'flex';
+            document.getElementById('status-text').innerHTML = 'Build succeeded';
+            document.getElementById('status-bar').style.backgroundColor = '#007acc'; // Blue for debug
+            notifyTerminal("Build started...\nBuild succeeded.");
+            document.getElementById('output-content').innerHTML = ''; // Clear output on fresh run
+            isRunning = true;
+
+            if (state.projType === 'console') {
+                switchBottomTab('output');
+                executeCSharpMethod("Main", state.files['Program.cs']);
+                printOutput(`\n${state.projName}.exe (process 1001) exited with code 0.`);
+                stopDebugging();
+            } else {
+                const win = document.getElementById('run-app-window');
+                const canvas = document.getElementById('run-app-canvas');
+                let titleMatch = state.files['Form1.cs'].match(/this\.Text\s*=\s*"(.*?)"/);
+                document.getElementById('run-app-title').innerText = titleMatch ? titleMatch[1] : "Form1";
+                
+                canvas.innerHTML = '';
+                state.controls.forEach(ctrl => {
+                    let el = document.createElement('div');
+                    el.style.position = 'absolute'; el.style.left = ctrl.x + 'px'; el.style.top = ctrl.y + 'px';
+                    el.innerHTML = getHtmlForControl(ctrl.type, ctrl.text, true);
+                    
+                    if (ctrl.type === 'Button') {
+                        el.children[0].onclick = () => executeCSharpMethod(`${ctrl.id}_Click`, state.files['Form1.cs']);
+                    }
+                    canvas.appendChild(el);
+                });
+                win.style.display = 'flex';
+                document.getElementById('status-bar').style.backgroundColor = '#ca5100'; // Orange for running WinForms
+            }
+        }
+
+        function stopDebugging() {
+            isRunning = false; 
+            document.getElementById('run-app-window').style.display = 'none'; 
+            document.getElementById('stop-btn').style.display = 'none';
+            document.getElementById('status-text').innerHTML = 'Ready';
+            document.getElementById('status-bar').style.backgroundColor = '#007acc';
+        }
+
+        // The Mini Interpreter for C# Method Blocks
+        function executeCSharpMethod(methodName, codeStr) {
+            // Find method signature
+            const methodIdx = codeStr.indexOf(methodName);
+            if (methodIdx === -1) return; // Method does not exist in code
+            
+            // Find start of block
+            const startBrace = codeStr.indexOf('{', methodIdx);
+            if (startBrace === -1) return;
+
+            let braceCount = 1;
+            let endBrace = -1;
+            
+            // Extract exact code block
+            for (let i = startBrace + 1; i < codeStr.length; i++) {
+                if (codeStr[i] === '{') braceCount++;
+                else if (codeStr[i] === '}') braceCount--;
+
+                if (braceCount === 0) {
+                    endBrace = i;
+                    break;
+                }
+            }
+
+            if (endBrace !== -1) {
+                let block = codeStr.substring(startBrace + 1, endBrace);
+                
+                // Parse standard commands
+                let lines = block.split(';');
+                for (let line of lines) {
+                    line = line.trim();
+                    if(line.startsWith('//')) continue; // Skip comments
+
+                    if (line.startsWith('Console.WriteLine')) {
+                        let innerMatch = line.match(/Console\.WriteLine\(([\s\S]*?)\)/);
+                        if (innerMatch) {
+                            let text = innerMatch[1].trim();
+                            if(text.startsWith('"') && text.endsWith('"')) text = text.substring(1, text.length - 1);
+                            switchBottomTab('output');
+                            printOutput(text);
+                        }
+                    } 
+                    else if (line.startsWith('MessageBox.Show')) {
+                        let innerMatch = line.match(/MessageBox\.Show\(([\s\S]*?)\)/);
+                        if (innerMatch) {
+                            let text = innerMatch[1].trim();
+                            if(text.startsWith('"') && text.endsWith('"')) text = text.substring(1, text.length - 1);
+                            alert(text); // Native JS Alert maps to MessageBox
+                        }
+                    }
+                }
+            }
+        }
+
+        // ==========================================
+        // PANELS, TABS & UTILS
+        // ==========================================
+        function switchBottomTab(tab) {
+            document.querySelectorAll('.btm-tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.panel-content').forEach(p => p.classList.remove('active'));
+            document.getElementById('tab-' + tab).classList.add('active');
+            document.getElementById(tab + '-content').classList.add('active');
+        }
+
+        function notifyTerminal(msg) {
+            const term = document.getElementById('notify-content');
+            let time = new Date().toLocaleTimeString();
+            term.innerHTML += `[${time}] ${msg}<br>`;
+            term.scrollTop = term.scrollHeight;
+        }
+
+        function printOutput(msg) {
+            const term = document.getElementById('output-content');
+            term.innerHTML += `${msg}<br>`;
+            term.scrollTop = term.scrollHeight;
+        }
+
+        // Draggable App Window
+        let isDragApp = false, apX, apY, wnX, wnY;
+        const appW = document.getElementById('run-app-window');
+        document.getElementById('run-app-drag').onmousedown = (e) => {
+            isDragApp = true; apX = e.clientX; apY = e.clientY; wnX = appW.offsetLeft; wnY = appW.offsetTop;
+            document.onmousemove = (me) => { if (isDragApp) { appW.style.left = (wnX + me.clientX - apX) + 'px'; appW.style.top = (wnY + me.clientY - apY) + 'px'; } };
+            document.onmouseup = () => { isDragApp = false; document.onmousemove = null; };
+        };
+    </script>
+</body>
+</html>
