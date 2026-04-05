@@ -1,5 +1,5 @@
 // Whiteboard App - GoodNotes Style
-// Fully offline, works in browser
+// Fully offline, works in browser with macOS design
 
 class Whiteboard {
     constructor() {
@@ -10,7 +10,7 @@ class Whiteboard {
         // State
         this.isDrawing = false;
         this.currentTool = 'pen';
-        this.currentColor = '#000000';
+        this.currentColor = '#1d1d1f';
         this.currentSize = 3;
         this.lastX = 0;
         this.lastY = 0;
@@ -23,6 +23,11 @@ class Whiteboard {
         this.history = [];
         this.historyIndex = -1;
         
+        // PDF.js worker
+        if (typeof pdfjsLib !== 'undefined') {
+            pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+        }
+        
         // Initialize
         this.init();
     }
@@ -30,15 +35,29 @@ class Whiteboard {
     init() {
         this.resizeCanvas();
         this.setupEventListeners();
-        this.saveState();
-        this.updateThumbnail();
+        this.addPage(); // Start with first page
+        this.loadTheme();
         
         // Set initial canvas background
-        this.ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--canvas-bg') || '#ffffff';
-        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+        this.clearCanvas(false);
+    }
+    
+    loadTheme() {
+        const savedTheme = localStorage.getItem('wb-theme') || 'light';
+        document.documentElement.setAttribute('data-theme', savedTheme);
+        this.updateThemeIcon(savedTheme);
+    }
+    
+    updateThemeIcon(theme) {
+        const btn = document.getElementById('themeToggle');
+        if (btn) {
+            btn.querySelector('span').textContent = theme === 'dark' ? '☀️' : '🌙';
+        }
     }
     
     resizeCanvas() {
+        if (!this.canvasWrapper) return;
+        
         const rect = this.canvasWrapper.getBoundingClientRect();
         this.canvas.width = rect.width;
         this.canvas.height = rect.height;
@@ -48,19 +67,20 @@ class Whiteboard {
             const img = new Image();
             img.onload = () => {
                 this.ctx.drawImage(img, 0, 0);
+                this.saveState(false);
             };
             img.src = this.pages[this.currentPageIndex];
         }
     }
     
     setupEventListeners() {
-        // Canvas events
+        // Canvas events - Mouse
         this.canvas.addEventListener('mousedown', (e) => this.startDrawing(e));
         this.canvas.addEventListener('mousemove', (e) => this.draw(e));
         this.canvas.addEventListener('mouseup', () => this.stopDrawing());
         this.canvas.addEventListener('mouseout', () => this.stopDrawing());
         
-        // Touch events
+        // Canvas events - Touch
         this.canvas.addEventListener('touchstart', (e) => {
             e.preventDefault();
             const touch = e.touches[0];
@@ -69,7 +89,7 @@ class Whiteboard {
                 clientY: touch.clientY
             });
             this.canvas.dispatchEvent(mouseEvent);
-        });
+        }, { passive: false });
         
         this.canvas.addEventListener('touchmove', (e) => {
             e.preventDefault();
@@ -79,12 +99,13 @@ class Whiteboard {
                 clientY: touch.clientY
             });
             this.canvas.dispatchEvent(mouseEvent);
-        });
+        }, { passive: false });
         
-        this.canvas.addEventListener('touchend', () => {
+        this.canvas.addEventListener('touchend', (e) => {
+            e.preventDefault();
             const mouseEvent = new MouseEvent('mouseup', {});
             this.canvas.dispatchEvent(mouseEvent);
-        });
+        }, { passive: false });
         
         // Window resize
         window.addEventListener('resize', () => this.resizeCanvas());
@@ -107,59 +128,64 @@ class Whiteboard {
             });
         });
         
-        // Size slider
-        document.getElementById('sizeSlider').addEventListener('input', (e) => {
-            this.currentSize = parseInt(e.target.value);
-        });
+        // Custom color picker
+        const customColor = document.getElementById('customColor');
+        if (customColor) {
+            customColor.addEventListener('input', (e) => {
+                document.querySelectorAll('.color-btn').forEach(b => b.classList.remove('active'));
+                this.currentColor = e.target.value;
+            });
+        }
+        
+        // Stroke size slider
+        const strokeSizeInput = document.getElementById('strokeSize');
+        const strokeSizeValue = document.getElementById('strokeSizeValue');
+        if (strokeSizeInput) {
+            strokeSizeInput.addEventListener('input', (e) => {
+                this.currentSize = parseInt(e.target.value);
+                if (strokeSizeValue) {
+                    strokeSizeValue.textContent = this.currentSize;
+                }
+            });
+        }
         
         // Action buttons
-        document.getElementById('undoBtn').addEventListener('click', () => this.undo());
-        document.getElementById('redoBtn').addEventListener('click', () => this.redo());
-        document.getElementById('clearBtn').addEventListener('click', () => this.clearCanvas());
+        document.getElementById('undoBtn')?.addEventListener('click', () => this.undo());
+        document.getElementById('redoBtn')?.addEventListener('click', () => this.redo());
+        document.getElementById('clearBtn')?.addEventListener('click', () => this.clearCanvas(true));
         
-        // Export button
-        document.getElementById('exportBtn').addEventListener('click', () => {
-            document.getElementById('exportModal').classList.add('active');
+        // Export buttons
+        document.getElementById('exportPng')?.addEventListener('click', () => this.exportAsPng());
+        document.getElementById('exportPdf')?.addEventListener('click', () => this.exportAsPdf());
+        
+        // Import PDF button
+        document.getElementById('importPdfBtn')?.addEventListener('click', () => {
+            document.getElementById('pdfInput')?.click();
         });
         
-        // Export modal buttons
-        document.getElementById('exportPng').addEventListener('click', () => this.exportAsPng());
-        document.getElementById('exportPdf').addEventListener('click', () => this.exportAsPdf());
-        
-        // Close modal on overlay click
-        document.getElementById('exportModal').addEventListener('click', (e) => {
-            if (e.target === document.getElementById('exportModal')) {
-                document.getElementById('exportModal').classList.remove('active');
-            }
+        // File input change
+        document.getElementById('pdfInput')?.addEventListener('change', (e) => {
+            this.importFile(e);
         });
         
-        // Import PDF
-        document.getElementById('importPdfBtn').addEventListener('click', () => {
-            document.getElementById('pdfInput').click();
-        });
-        
-        document.getElementById('pdfInput').addEventListener('change', (e) => {
-            this.importPdf(e);
-        });
-        
-        // Add page
-        document.getElementById('addPageBtn').addEventListener('click', () => this.addPage());
+        // Add page button
+        document.getElementById('addPageBtn')?.addEventListener('click', () => this.addPage());
         
         // Theme toggle
-        document.getElementById('themeToggle').addEventListener('click', () => {
+        document.getElementById('themeToggle')?.addEventListener('click', () => {
             const html = document.documentElement;
             const currentTheme = html.getAttribute('data-theme');
             const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
             html.setAttribute('data-theme', newTheme);
             localStorage.setItem('wb-theme', newTheme);
+            this.updateThemeIcon(newTheme);
         });
-        
-        // Load saved theme
-        const savedTheme = localStorage.getItem('wb-theme') || 'light';
-        document.documentElement.setAttribute('data-theme', savedTheme);
         
         // Keyboard shortcuts
         document.addEventListener('keydown', (e) => {
+            // Don't trigger shortcuts when typing in inputs
+            if (e.target.tagName === 'INPUT') return;
+            
             if (e.ctrlKey || e.metaKey) {
                 if (e.key === 'z') {
                     e.preventDefault();
@@ -168,24 +194,62 @@ class Whiteboard {
                     } else {
                         this.undo();
                     }
+                } else if (e.key === 'y') {
+                    e.preventDefault();
+                    this.redo();
+                } else if (e.key === 's') {
+                    e.preventDefault();
+                    this.exportAsPng();
+                }
+            }
+            
+            // Tool shortcuts
+            if (!e.ctrlKey && !e.metaKey) {
+                switch(e.key.toLowerCase()) {
+                    case 'p': this.selectTool('pen'); break;
+                    case 'h': this.selectTool('highlighter'); break;
+                    case 'e': this.selectTool('eraser'); break;
                 }
             }
         });
     }
     
+    selectTool(tool) {
+        this.currentTool = tool;
+        document.querySelectorAll('[data-tool]').forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.tool === tool);
+        });
+    }
+    
+    getPointerPos(e) {
+        const rect = this.canvas.getBoundingClientRect();
+        return {
+            x: (e.clientX || e.touches?.[0]?.clientX) - rect.left,
+            y: (e.clientY || e.touches?.[0]?.clientY) - rect.top
+        };
+    }
+    
     startDrawing(e) {
         this.isDrawing = true;
-        const rect = this.canvas.getBoundingClientRect();
-        this.lastX = e.clientX - rect.left;
-        this.lastY = e.clientY - rect.top;
+        const pos = this.getPointerPos(e);
+        this.lastX = pos.x;
+        this.lastY = pos.y;
+        
+        // Draw a dot for single clicks
+        this.ctx.beginPath();
+        this.ctx.arc(this.lastX, this.lastY, this.currentSize / 2, 0, Math.PI * 2);
+        this.ctx.fillStyle = this.currentTool === 'eraser' ? 
+            (getComputedStyle(document.documentElement).getPropertyValue('--bg-canvas').trim() || '#ffffff') : 
+            this.currentColor;
+        this.ctx.fill();
     }
     
     draw(e) {
         if (!this.isDrawing) return;
         
-        const rect = this.canvas.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
+        const pos = this.getPointerPos(e);
+        const x = pos.x;
+        const y = pos.y;
         
         this.ctx.beginPath();
         this.ctx.moveTo(this.lastX, this.lastY);
@@ -197,13 +261,13 @@ class Whiteboard {
             this.ctx.lineCap = 'round';
             this.ctx.lineJoin = 'round';
         } else if (this.currentTool === 'highlighter') {
-            this.ctx.strokeStyle = this.currentColor + '40'; // 25% opacity
+            this.ctx.strokeStyle = this.currentColor + '60'; // 38% opacity
             this.ctx.lineWidth = this.currentSize * 3;
             this.ctx.lineCap = 'round';
             this.ctx.lineJoin = 'round';
-            this.ctx.globalAlpha = 0.3;
+            this.ctx.globalAlpha = 0.4;
         } else if (this.currentTool === 'eraser') {
-            this.ctx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--canvas-bg') || '#ffffff';
+            this.ctx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--bg-canvas').trim() || '#ffffff';
             this.ctx.lineWidth = this.currentSize * 2;
             this.ctx.lineCap = 'round';
             this.ctx.lineJoin = 'round';
@@ -224,7 +288,7 @@ class Whiteboard {
         }
     }
     
-    saveState() {
+    saveState(saveToPages = true) {
         // Remove any redo states
         this.history = this.history.slice(0, this.historyIndex + 1);
         
@@ -239,7 +303,9 @@ class Whiteboard {
         }
         
         // Save to pages array
-        this.pages[this.currentPageIndex] = this.canvas.toDataURL();
+        if (saveToPages) {
+            this.pages[this.currentPageIndex] = this.canvas.toDataURL();
+        }
     }
     
     undo() {
@@ -263,29 +329,42 @@ class Whiteboard {
             this.ctx.drawImage(img, 0, 0);
         };
         img.src = dataUrl;
-        this.pages[this.currentPageIndex] = dataUrl;
+        if (this.pages[this.currentPageIndex]) {
+            this.pages[this.currentPageIndex] = dataUrl;
+        }
         this.updateThumbnail();
     }
     
-    clearCanvas() {
-        if (confirm('Are you sure you want to clear the entire canvas?')) {
-            this.ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--canvas-bg') || '#ffffff';
-            this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
-            this.saveState();
-            this.updateThumbnail();
+    clearCanvas(showConfirm = true) {
+        if (showConfirm && !confirm('Are you sure you want to clear the entire canvas?')) {
+            return;
         }
+        
+        const bgColor = getComputedStyle(document.documentElement).getPropertyValue('--bg-canvas').trim() || '#ffffff';
+        this.ctx.fillStyle = bgColor;
+        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+        this.saveState();
+        this.updateThumbnail();
     }
     
     addPage() {
-        this.currentPageIndex++;
-        this.pages[this.currentPageIndex] = null;
+        // Save current page before adding new one
+        if (this.pages[this.currentPageIndex]) {
+            this.pages[this.currentPageIndex] = this.canvas.toDataURL();
+        }
+        
+        this.currentPageIndex = this.pages.length;
+        this.pages.push(null);
         
         // Clear canvas for new page
-        this.ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--canvas-bg') || '#ffffff';
-        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+        this.clearCanvas(false);
         
-        this.saveState();
+        // Reset history for new page
+        this.history = [this.canvas.toDataURL()];
+        this.historyIndex = 0;
+        
         this.addThumbnail(this.currentPageIndex);
+        this.updateActivePage();
     }
     
     updateThumbnail() {
@@ -295,35 +374,57 @@ class Whiteboard {
             thumbCanvas.width = 60;
             thumbCanvas.height = 80;
             
+            // Fill with background
+            const bgColor = getComputedStyle(document.documentElement).getPropertyValue('--bg-canvas').trim() || '#ffffff';
+            thumbCtx.fillStyle = bgColor;
+            thumbCtx.fillRect(0, 0, 60, 80);
+            
             // Scale down the main canvas
             const scale = Math.min(60 / this.canvas.width, 80 / this.canvas.height);
             const x = (60 - this.canvas.width * scale) / 2;
             const y = (80 - this.canvas.height * scale) / 2;
             
-            thumbCtx.fillStyle = '#ffffff';
-            thumbCtx.fillRect(0, 0, 60, 80);
             thumbCtx.drawImage(this.canvas, 0, 0, this.canvas.width, this.canvas.height, x, y, this.canvas.width * scale, this.canvas.height * scale);
         }
     }
     
     addThumbnail(pageIndex) {
         const pagesPanel = document.getElementById('pagesPanel');
-        const addBtn = document.getElementById('addPageBtn');
+        if (!pagesPanel) return;
         
         const thumbDiv = document.createElement('div');
         thumbDiv.className = 'page-thumbnail';
         thumbDiv.dataset.page = pageIndex;
-        thumbDiv.innerHTML = `<canvas id="thumb${pageIndex}"></canvas>`;
+        thumbDiv.innerHTML = `<canvas id="thumb${pageIndex}"></canvas><button class="delete-page" title="Delete Page">×</button>`;
         
-        thumbDiv.addEventListener('click', () => this.switchPage(pageIndex));
+        thumbDiv.addEventListener('click', (e) => {
+            if (!e.target.classList.contains('delete-page')) {
+                this.switchPage(pageIndex);
+            }
+        });
         
-        pagesPanel.insertBefore(thumbDiv, addBtn);
+        // Delete page button
+        const deleteBtn = thumbDiv.querySelector('.delete-page');
+        deleteBtn?.addEventListener('click', (e) => {
+            e.stopPropagation();
+            this.deletePage(pageIndex);
+        });
         
-        // Update thumbnail
+        pagesPanel.appendChild(thumbDiv);
+        
+        // Update thumbnail after a short delay
         setTimeout(() => this.updateThumbnail(), 100);
     }
     
+    updateActivePage() {
+        document.querySelectorAll('.page-thumbnail').forEach(t => {
+            t.classList.toggle('active', parseInt(t.dataset.page) === this.currentPageIndex);
+        });
+    }
+    
     switchPage(pageIndex) {
+        if (pageIndex === this.currentPageIndex) return;
+        
         // Save current page
         this.pages[this.currentPageIndex] = this.canvas.toDataURL();
         
@@ -331,7 +432,8 @@ class Whiteboard {
         this.currentPageIndex = pageIndex;
         
         // Clear canvas
-        this.ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--canvas-bg') || '#ffffff';
+        const bgColor = getComputedStyle(document.documentElement).getPropertyValue('--bg-canvas').trim() || '#ffffff';
+        this.ctx.fillStyle = bgColor;
         this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
         
         // Load page content if exists
@@ -339,17 +441,46 @@ class Whiteboard {
             const img = new Image();
             img.onload = () => {
                 this.ctx.drawImage(img, 0, 0);
+                this.saveState(false);
             };
             img.src = this.pages[pageIndex];
+        } else {
+            this.saveState(false);
         }
         
         // Update active state
-        document.querySelectorAll('.page-thumbnail').forEach(t => t.classList.remove('active'));
-        document.querySelector(`.page-thumbnail[data-page="${pageIndex}"]`).classList.add('active');
+        this.updateActivePage();
         
-        // Reset history for new page
+        // Reset history for the switched page
         this.history = [this.canvas.toDataURL()];
         this.historyIndex = 0;
+    }
+    
+    deletePage(pageIndex) {
+        if (this.pages.length <= 1) {
+            alert('You must have at least one page.');
+            return;
+        }
+        
+        if (!confirm('Delete this page?')) return;
+        
+        // Remove page from array
+        this.pages.splice(pageIndex, 1);
+        
+        // If deleting current page, switch to previous or first page
+        if (pageIndex === this.currentPageIndex) {
+            this.currentPageIndex = Math.max(0, pageIndex - 1);
+        } else if (pageIndex < this.currentPageIndex) {
+            this.currentPageIndex--;
+        }
+        
+        // Rebuild thumbnails
+        const pagesPanel = document.getElementById('pagesPanel');
+        pagesPanel.innerHTML = '';
+        this.pages.forEach((_, idx) => this.addThumbnail(idx));
+        
+        // Switch to the adjusted page index
+        this.switchPage(this.currentPageIndex);
     }
     
     exportAsPng() {
@@ -357,54 +488,94 @@ class Whiteboard {
         link.download = `whiteboard-${Date.now()}.png`;
         link.href = this.canvas.toDataURL('image/png');
         link.click();
-        document.getElementById('exportModal').classList.remove('active');
     }
     
-    exportAsPdf() {
-        // Simple PDF export using canvas data
-        const imgData = this.canvas.toDataURL('image/jpeg', 0.9);
-        
-        // Create a simple PDF using jsPDF CDN or download as image
-        // For simplicity, we'll download as image with PDF extension
-        // In production, you'd use jsPDF library
-        
-        const link = document.createElement('a');
-        link.download = `whiteboard-${Date.now()}.pdf`;
-        link.href = imgData;
-        link.click();
-        
-        document.getElementById('exportModal').classList.remove('active');
-        
-        // Show note about PDF export
-        alert('Note: For full PDF support with multiple pages, consider using a PDF library like jsPDF. This exports the current page as an image.');
+    async exportAsPdf() {
+        try {
+            const { jsPDF } = window.jspdf;
+            const pdf = new jsPDF({
+                orientation: this.canvas.width > this.canvas.height ? 'landscape' : 'portrait',
+                unit: 'px',
+                format: [this.canvas.width, this.canvas.height]
+            });
+            
+            const imgData = this.canvas.toDataURL('image/jpeg', 0.95);
+            pdf.addImage(imgData, 'JPEG', 0, 0, this.canvas.width, this.canvas.height);
+            pdf.save(`whiteboard-${Date.now()}.pdf`);
+        } catch (error) {
+            console.error('PDF export error:', error);
+            // Fallback: download as image
+            alert('PDF library not loaded. Downloading as PNG instead.');
+            this.exportAsPng();
+        }
     }
     
-    importPdf(e) {
+    async importFile(e) {
         const file = e.target.files[0];
         if (!file) return;
         
-        if (file.type !== 'application/pdf') {
-            alert('Please select a PDF file');
-            return;
-        }
+        const loadingOverlay = document.getElementById('loadingOverlay');
         
-        // Read PDF as data URL and display first page as image
-        const reader = new FileReader();
-        reader.onload = (event) => {
-            // For PDF import, we need pdf.js library
-            // For now, show a message
-            alert('PDF import requires pdf.js library. In production, include pdf.js from CDN to render PDF pages on the canvas.');
-            
-            // Simple image fallback
-            const img = new Image();
-            img.onload = () => {
-                this.ctx.drawImage(img, 0, 0, Math.min(img.width, this.canvas.width), Math.min(img.height, this.canvas.height));
+        try {
+            if (file.type === 'application/pdf') {
+                // Show loading
+                loadingOverlay?.classList.add('show');
+                
+                // Read PDF
+                const arrayBuffer = await file.arrayBuffer();
+                const pdf = await pdfjsLib.getDocument(arrayBuffer).promise;
+                
+                // Render first page
+                const page = await pdf.getPage(1);
+                const viewport = page.getViewport({ scale: 1 });
+                
+                // Create temporary canvas for rendering
+                const tempCanvas = document.createElement('canvas');
+                const tempCtx = tempCanvas.getContext('2d');
+                tempCanvas.width = viewport.width;
+                tempCanvas.height = viewport.height;
+                
+                await page.render({
+                    canvasContext: tempCtx,
+                    viewport: viewport
+                }).promise;
+                
+                // Resize main canvas to match PDF
+                this.canvas.width = tempCanvas.width;
+                this.canvas.height = tempCanvas.height;
+                
+                // Draw PDF on main canvas
+                this.ctx.drawImage(tempCanvas, 0, 0);
+                
                 this.saveState();
                 this.updateThumbnail();
-            };
-            img.src = event.target.result;
-        };
-        reader.readAsDataURL(file);
+                
+                loadingOverlay?.classList.remove('show');
+            } else if (file.type.startsWith('image/')) {
+                // Import image
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    const img = new Image();
+                    img.onload = () => {
+                        // Resize canvas to fit image
+                        this.canvas.width = img.width;
+                        this.canvas.height = img.height;
+                        
+                        this.ctx.drawImage(img, 0, 0);
+                        this.saveState();
+                        this.updateThumbnail();
+                    };
+                    img.src = event.target.result;
+                };
+                reader.readAsDataURL(file);
+            } else {
+                alert('Please select a PDF or image file.');
+            }
+        } catch (error) {
+            console.error('Import error:', error);
+            loadingOverlay?.classList.remove('show');
+            alert('Error importing file. Please try again.');
+        }
         
         // Reset input
         e.target.value = '';

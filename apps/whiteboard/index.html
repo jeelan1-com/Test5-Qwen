@@ -58,7 +58,7 @@
         </div>
         
         <div class="toolbar-section file-actions">
-            <button class="action-btn primary" id="importPdf" title="Import PDF">
+            <button class="action-btn primary" id="importPdfBtn" title="Import PDF">
                 <span>📄</span> Import
             </button>
             <button class="action-btn primary" id="exportPng" title="Export as PNG">
@@ -80,21 +80,22 @@
     <div class="pages-sidebar glass-panel">
         <div class="pages-header">
             <h3>Pages</h3>
-            <button class="add-page-btn" id="addPage" title="Add Page">+</button>
+            <button class="add-page-btn" id="addPageBtn" title="Add Page">+</button>
         </div>
-        <div class="pages-list" id="pagesList">
+        <div class="pages-list" id="pagesPanel">
             <!-- Page thumbnails will be added here -->
         </div>
     </div>
     
     <!-- Main Canvas Area -->
     <div class="canvas-container">
-        <canvas id="whiteboard"></canvas>
-        <div class="canvas-overlay" id="canvasOverlay"></div>
+        <div class="canvas-wrapper" id="canvasWrapper">
+            <canvas id="whiteboard"></canvas>
+        </div>
     </div>
     
     <!-- Hidden file input for PDF import -->
-    <input type="file" id="pdfInput" accept=".pdf" style="display: none;">
+    <input type="file" id="pdfInput" accept=".pdf,.png,.jpg,.jpeg" style="display: none;">
     
     <!-- Loading Overlay -->
     <div class="loading-overlay" id="loadingOverlay">
