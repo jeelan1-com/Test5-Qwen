@@ -9,7 +9,7 @@
 </head>
 <body>
     <!-- Navigation -->
-    <nav class="navbar">
+    <nav class="navbar glass-panel">
         <div class="nav-container">
             <a href="../../index.html" class="logo">
                 <span class="logo-icon">◆</span>
@@ -222,3 +222,40 @@
     <script src="vm.js"></script>
 </body>
 </html>
+    <script>
+        // Initialize footer theme toggle
+        (function() {
+            const themeToggle = document.getElementById('themeToggle');
+            const footerThemeToggle = document.getElementById('footerThemeToggle');
+            
+            function updateThemeIcons(theme) {
+                const sunIcons = document.querySelectorAll('.sun');
+                const moonIcons = document.querySelectorAll('.moon');
+                if (theme === 'dark') {
+                    sunIcons.forEach(icon => icon.style.display = 'none');
+                    moonIcons.forEach(icon => icon.style.display = 'inline');
+                } else {
+                    sunIcons.forEach(icon => icon.style.display = 'inline');
+                    moonIcons.forEach(icon => icon.style.display = 'none');
+                }
+            }
+            
+            // Load saved theme
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+            updateThemeIcons(savedTheme);
+            
+            // Toggle theme function
+            function toggleTheme() {
+                const html = document.documentElement;
+                const currentTheme = html.getAttribute('data-theme');
+                const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+                html.setAttribute('data-theme', newTheme);
+                localStorage.setItem('theme', newTheme);
+                updateThemeIcons(newTheme);
+            }
+            
+            themeToggle?.addEventListener('click', toggleTheme);
+            footerThemeToggle?.addEventListener('click', toggleTheme);
+        })();
+    </script>
