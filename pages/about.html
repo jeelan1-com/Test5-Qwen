@@ -324,37 +324,68 @@
     </div>
 
     <!-- Footer -->
-    <footer class="footer">
-        <div class="footer-content">
-            <div class="footer-section">
-                <h4>About NexusHub</h4>
-                <p>Your complete digital workspace for apps, tools, and creativity.</p>
+    <footer class="footer" style="margin-top: 4rem; border-top: 1px solid var(--border-color); padding: 3rem 2rem; background: var(--bg-secondary);">
+        <div class="footer-content" style="max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 2rem;">
+            <div>
+                <h4 style="margin-bottom: 0.5rem;">About NexusHub</h4>
+                <p style="font-size: 0.875rem; color: var(--text-secondary);">Your complete digital workspace for apps, tools, and creativity.</p>
             </div>
-            <div class="footer-section">
-                <h4>Quick Links</h4>
-                <a href="../index.html">Home</a>
-                <a href="apps.html">Apps</a>
-                <a href="news.html">News</a>
+            <div style="display: flex; gap: 2rem;">
+                <div>
+                    <h5 style="margin-bottom: 0.5rem; font-size: 0.875rem;">Quick Links</h5>
+                    <a href="../index.html" style="display: block; font-size: 0.875rem; color: var(--text-secondary); text-decoration: none; margin-bottom: 0.25rem;">Home</a>
+                    <a href="apps.html" style="display: block; font-size: 0.875rem; color: var(--text-secondary); text-decoration: none; margin-bottom: 0.25rem;">Apps</a>
+                    <a href="docs.html" style="display: block; font-size: 0.875rem; color: var(--text-secondary); text-decoration: none;">Documentation</a>
+                </div>
+                <div>
+                    <h5 style="margin-bottom: 0.5rem; font-size: 0.875rem;">Resources</h5>
+                    <a href="news.html" style="display: block; font-size: 0.875rem; color: var(--text-secondary); text-decoration: none; margin-bottom: 0.25rem;">News</a>
+                    <a href="contact.html" style="display: block; font-size: 0.875rem; color: var(--text-secondary); text-decoration: none; margin-bottom: 0.25rem;">Contact</a>
+                    <a href="#" style="display: block; font-size: 0.875rem; color: var(--text-secondary); text-decoration: none;">Support</a>
+                </div>
             </div>
-            <div class="footer-section">
-                <h4>Resources</h4>
-                <a href="docs.html">Documentation</a>
-                <a href="contact.html">Contact</a>
-                <a href="#">Support</a>
-            </div>
-            <div class="footer-section">
-                <h4>Theme</h4>
-                <button class="theme-toggle footer-theme-toggle" id="footerThemeToggle" aria-label="Toggle theme">
-                    <i class="fas fa-moon"></i>
-                    <i class="fas fa-sun"></i>
+            <div>
+                <h5 style="margin-bottom: 0.5rem; font-size: 0.875rem;">Theme</h5>
+                <button class="theme-toggle" id="footerThemeToggle" aria-label="Toggle theme" style="background: var(--bg-tertiary); border: 1px solid var(--border-color); cursor: pointer; padding: 0.5rem 1rem; border-radius: 0.5rem; display: flex; align-items: center; gap: 0.5rem;">
+                    <span class="sun-icon">☀️</span>
+                    <span class="moon-icon">🌙</span>
+                    <span style="font-size: 0.875rem;">Toggle Theme</span>
                 </button>
             </div>
         </div>
-        <div class="footer-bottom">
-            <p>&copy; 2024 NexusHub. All rights reserved. | Built with ❤️ using modern web technologies</p>
+        <div style="text-align: center; margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--border-color); font-size: 0.875rem; color: var(--text-secondary);">
+            © 2024 NexusHub. All rights reserved. | Built with ❤️ using modern web technologies
         </div>
     </footer>
 
     <script src="../script.js"></script>
+    <script>
+        (function() {
+            const footerThemeToggle = document.getElementById('footerThemeToggle');
+            function updateThemeIcons(theme) {
+                const sunIcons = document.querySelectorAll('.sun-icon');
+                const moonIcons = document.querySelectorAll('.moon-icon');
+                if (theme === 'dark') {
+                    sunIcons.forEach(icon => icon.style.display = 'none');
+                    moonIcons.forEach(icon => icon.style.display = 'inline');
+                } else {
+                    sunIcons.forEach(icon => icon.style.display = 'inline');
+                    moonIcons.forEach(icon => icon.style.display = 'none');
+                }
+            }
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+            updateThemeIcons(savedTheme);
+            function toggleTheme() {
+                const html = document.documentElement;
+                const currentTheme = html.getAttribute('data-theme');
+                const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+                html.setAttribute('data-theme', newTheme);
+                localStorage.setItem('theme', newTheme);
+                updateThemeIcons(newTheme);
+            }
+            footerThemeToggle?.addEventListener('click', toggleTheme);
+        })();
+    </script>
 </body>
 </html>
