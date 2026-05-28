@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multiplayer Horror Narrative - Game Design Document</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #e0e0e0;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 40px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+        }
+        h1 {
+            color: #ff6b6b;
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+        .subtitle {
+            text-align: center;
+            color: #a0a0a0;
+            margin-bottom: 40px;
+            font-style: italic;
+        }
+        h2 {
+            color: #4ecdc4;
+            border-bottom: 2px solid #4ecdc4;
+            padding-bottom: 10px;
+            margin-top: 40px;
+            margin-bottom: 20px;
+        }
+        h3 {
+            color: #ffe66d;
+            margin-top: 25px;
+            margin-bottom: 15px;
+        }
+        h4 {
+            color: #95e1d3;
+            margin-top: 20px;
+            margin-bottom: 10px;
+        }
+        p {
+            margin-bottom: 15px;
+            text-align: justify;
+        }
+        ul, ol {
+            margin-bottom: 15px;
+            margin-left: 30px;
+        }
+        li {
+            margin-bottom: 8px;
+        }
+        .section {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 25px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            border-left: 4px solid #ff6b6b;
+        }
+        .chapter {
+            background: rgba(78, 205, 196, 0.1);
+            padding: 25px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            border-left: 4px solid #4ecdc4;
+        }
+        .scene {
+            background: rgba(255, 230, 109, 0.05);
+            padding: 20px;
+            border-radius: 8px;
+            margin: 15px 0;
+            border-left: 3px solid #ffe66d;
+        }
+        .fix-item {
+            background: rgba(149, 225, 211, 0.1);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            border-left: 3px solid #95e1d3;
+        }
+        .highlight {
+            color: #ff6b6b;
+            font-weight: bold;
+        }
+        .tech-stack {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+        .tech-item {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        .tech-item strong {
+            color: #4ecdc4;
+            display: block;
+            margin-bottom: 10px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        th, td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        th {
+            background: rgba(78, 205, 196, 0.2);
+            color: #4ecdc4;
+            font-weight: bold;
+        }
+        tr:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+        .role-badge {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: bold;
+            margin: 5px;
+        }
+        .role-survivor { background: #4ecdc4; color: #1a1a2e; }
+        .role-researcher { background: #ffe66d; color: #1a1a2e; }
+        .role-police { background: #ff6b6b; color: white; }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+            h1 {
+                font-size: 2em;
+            }
+            .tech-stack {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎮 Multiplayer Horror Narrative</h1>
+        <p class="subtitle">Game Design & Technical Requirements Document</p>
+
+        <!-- Section 1: Project Overview -->
+        <div class="section">
+            <h2>1. Project Overview</h2>
+            <p>A lightweight, browser-based multiplayer horror game focusing on a deep, stressful narrative with light puzzle elements. The aesthetic is low-poly/voxel (similar to Roblox/Minecraft) with a grid-based inventory system.</p>
+            
+            <table>
+                <tr>
+                    <th>Feature</th>
+                    <th>Specification</th>
+                </tr>
+                <tr>
+                    <td><strong>Player Count</strong></td>
+                    <td>1 to 50 players per lobby. Empty slots are filled by scripted NPCs ("Fake AI").</td>
+                </tr>
+                <tr>
+                    <td><strong>Perspective</strong></td>
+                    <td>First-person or Third-person (developer's choice for optimization).</td>
+                </tr>
+                <tr>
+                    <td><strong>Aesthetic</strong></td>
+                    <td>Low-poly/Voxel (Roblox/Minecraft style)</td>
+                </tr>
+                <tr>
+                    <td><strong>Inventory</strong></td>
+                    <td>Grid-based system with equippable bags</td>
+                </tr>
+            </table>
+        </div>
+
+        <!-- Section 2: Technical Stack -->
+        <div class="section">
+            <h2>2. Technical Stack & Architecture</h2>
+            
+            <div class="tech-stack">
+                <div class="tech-item">
+                    <strong>Frontend</strong>
+                    HTML5, CSS, lightweight Vanilla JS<br>
+                    <small>(or Phaser/Three.js for 3D)</small>
+                </div>
+                <div class="tech-item">
+                    <strong>Networking (Primary)</strong>
+                    Peer.js (WebRTC)<br>
+                    <small>P2P Host/Client architecture</small>
+                </div>
+                <div class="tech-item">
+                    <strong>Networking (Fallback)</strong>
+                    Node.js + WebSockets<br>
+                    <small>Socket.io for lobbies &gt;10 players</small>
+                </div>
+                <div class="tech-item">
+                    <strong>Optimization</strong>
+                    Chunk loading, distance fog<br>
+                    <small>Low-poly assets for high FPS</small>
+                </div>
+            </div>
+
+            <div class="fix-item">
+                <h4>⚠️ Critical Architecture Note:</h4>
+                <p>Peer.js (WebRTC) will crash or heavily lag with 50 P2P connections. <span class="highlight">Node.js server must act as the authoritative server for lobbies &gt;10 players</span> to prevent lag and desync.</p>
+            </div>
+
+            <h4>Physics & Vehicles:</h4>
+            <p>Use local coordinate spaces for vehicle interiors so players do not clip or fly away when the vehicle moves.</p>
+        </div>
+
+        <!-- Section 3: Core Gameplay Mechanics -->
+        <div class="section">
+            <h2>3. Core Gameplay Mechanics</h2>
+
+            <h3>🎭 Roles System</h3>
+            <p>Players cycle through three distinct roles across chapters:</p>
+            <div style="margin: 20px 0;">
+                <span class="role-badge role-survivor">Main Survivor</span>
+                <span class="role-badge role-researcher">Researcher</span>
+                <span class="role-badge role-police">Police</span>
+            </div>
+            <p>Each role has unique uniforms, items, and spawn locations.</p>
+
+            <h3>🖱️ Interaction System</h3>
+            <ul>
+                <li><strong>Right-click:</strong> Interact, pick up items, or sit in vehicle seats</li>
+                <li><strong>Vehicle Entry:</strong> Players become children of vehicle's local coordinate space</li>
+            </ul>
+
+            <h3>🎒 Inventory System</h3>
+            <ul>
+                <li>Grid-based system (Minecraft/Roblox style)</li>
+                <li>Equippable bags for extra storage</li>
+                <li>Drag-and-drop item management</li>
+            </ul>
+
+            <h3>🤖 NPC System</h3>
+            <ul>
+                <li>Scripted "Fake AI" NPCs populate the world</li>
+                <li>Approximately 10 active NPCs per scene</li>
+                <li>Maintains illusion of crowded environment</li>
+            </ul>
+
+            <div class="fix-item">
+                <h4>💀 Death Mechanic (Chapter 2 Scene 2):</h4>
+                <p>High lethality scene implemented. Dead players enter <span class="highlight">"Spectator Mode"</span> or become Ghost NPCs for the remainder of the chapter.</p>
+            </div>
+        </div>
+
+        <!-- Section 4: Storyboard & Level Design -->
+        <div class="section">
+            <h2>4. Storyboard & Level Design</h2>
+
+            <!-- Chapter 1 -->
+            <div class="chapter">
+                <h3>📖 Chapter 1: The Survivors</h3>
+                <p><span class="role-badge role-survivor">Role: Main Character</span></p>
+
+                <div class="scene">
+                    <h4>Scene 1: Gutenberg Departure</h4>
+                    <ul>
+                        <li>Players spawn in a fenced 4-story house boundary</li>
+                        <li>Board one of 3 detailed, boxy buses (decorated with stars/holes)</li>
+                        <li><strong>Trigger:</strong> Bus departs when all seats are filled or countdown timer ends</li>
+                        <li>Unseated players are teleported to random seats</li>
+                    </ul>
+                </div>
+
+                <div class="scene">
+                    <h4>Scene 2: The Endless Road</h4>
+                    <ul>
+                        <li>Nighttime, horror atmosphere with distant spaceship in the sky</li>
+                        <li><strong>Mechanic:</strong> One player drives (controls bus within large bounding box)</li>
+                        <li>Road/trees scroll to create "infinite" illusion</li>
+                        <li><strong>Threats:</strong> Roadside shooters and incoming rocks</li>
+                        <li>Bus takes damage; eventually, unavoidable massive rock crashes the bus</li>
+                    </ul>
+                </div>
+
+                <div class="scene">
+                    <h4>Scene 3: Jungle Crash Site</h4>
+                    <ul>
+                        <li>Massive jungle environment (uses chunk loading/fog)</li>
+                        <li>Broken buses scattered throughout</li>
+                        <li>Ghosts patrol but cannot enter bus wrecks</li>
+                        <li><strong>Objective:</strong> Build campfire → Scavenge iron → Craft antenna → Establish police signal</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Chapter 2 -->
+            <div class="chapter">
+                <h3>📖 Chapter 2: The Investigation</h3>
+                <p><span class="role-badge role-researcher">Roles: Researcher & Police</span></p>
+
+                <div class="scene">
+                    <h4>Scene 1: Researcher Prep</h4>
+                    <ul>
+                        <li>Players are Researchers; NPCs are Officers</li>
+                        <li><strong>Objective:</strong> Talk to lead Officer, pack gear in mini-lab truck compartment</li>
+                        <li>10-second timer to board 5 trucks and depart</li>
+                    </ul>
+                </div>
+
+                <div class="scene">
+                    <h4>Scene 2: The Haunted House</h4>
+                    <ul>
+                        <li>Arrive at massive, terrifying house</li>
+                        <li><strong>Objective:</strong> Conduct ghost research</li>
+                        <li><span class="highlight">High lethality scene</span> (most players will die)</li>
+                        <li>Survivors board the truck to escape</li>
+                    </ul>
+                </div>
+
+                <div class="scene">
+                    <h4>Scene 3: Police HQ</h4>
+                    <ul>
+                        <li>Players are now Police officers in large HQ with NPC cops</li>
+                        <li><strong>Objective:</strong> Receive briefing about missing persons in the jungle</li>
+                        <li>Board police vehicles (cars/buses)</li>
+                    </ul>
+                </div>
+
+                <div class="scene">
+                    <h4>Scene 4: Return to Gutenberg</h4>
+                    <ul>
+                        <li>Police arrive at Chapter 1 starting area</li>
+                        <li>Interrogate NPCs</li>
+                        <li>Depart in vehicles to transition to Chapter 3</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Chapter 3 -->
+            <div class="chapter">
+                <h3>📖 Chapter 3: The Climax</h3>
+                <p><span class="role-badge role-survivor">Main Character</span> <span class="role-badge role-police">Police</span></p>
+
+                <div class="scene">
+                    <h4>Scene 1: The Spaceship (Survivors)</h4>
+                    <ul>
+                        <li>Survivors navigate the jungle with firearms</li>
+                        <li>Follow green smoke to massive, broken spaceship</li>
+                        <li><strong>Trigger:</strong> Once all enter, doors lock and ship automatically launches into space</li>
+                    </ul>
+                </div>
+
+                <div class="scene">
+                    <h4>Scene 2: Jungle Escape (Police)</h4>
+                    <ul>
+                        <li>Police arrive at jungle crash site</li>
+                        <li>Ambushed by ghosts</li>
+                        <li><strong>Objective:</strong> Scavenge supplies and return to police vehicles</li>
+                        <li><span class="highlight">Strict 3-minute survival/escape timer</span></li>
+                    </ul>
+                </div>
+
+                <div class="scene">
+                    <h4>Scene 3: Ship Defense (Survivors)</h4>
+                    <ul>
+                        <li>Inside the moving spaceship</li>
+                        <li>Aliens breach the hull</li>
+                        <li><strong>Objective:</strong> Survive and defend ship's interior for set duration</li>
+                        <li>Ship reaches destination after defense period</li>
+                    </ul>
+                </div>
+
+                <div class="scene">
+                    <h4>Scene 4: Capture (Ending)</h4>
+                    <ul>
+                        <li>Ship docks at massive Alien Mothership</li>
+                        <li>Players are overpowered, arrested, and locked in cell</li>
+                        <li><strong>Final Shot:</strong> Looking out window at Earth in the distance</li>
+                        <li><span class="highlight">End of Season 1</span></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 5: Developer Fixes -->
+        <div class="section">
+            <h2>5. Developer Fixes & Missing Elements Addressed</h2>
+
+            <div class="fix-item">
+                <h4>1. 🔧 Networking Limit Fix</h4>
+                <p><strong>Problem:</strong> Peer.js (WebRTC) crashes or heavily lags with 50 P2P connections.</p>
+                <p><strong>Solution:</strong> Mandate Node.js server for lobbies &gt;10 players. P2P only for small groups (≤10 players).</p>
+            </div>
+
+            <div class="fix-item">
+                <h4>2. 🚌 Vehicle Physics Fix</h4>
+                <p><strong>Problem:</strong> Moving buses cause players to fly/clip through geometry.</p>
+                <p><strong>Solution:</strong> Implement local coordinate space parenting for interior players. Players become children of vehicle transform.</p>
+            </div>
+
+            <div class="fix-item">
+                <h4>3. 💀 Death Mechanic (Previously Missing)</h4>
+                <p><strong>Problem:</strong> Chapter 2 Scene 2 has high lethality with no death handling.</p>
+                <p><strong>Solution:</strong> Implement "Spectator Mode" or allow dead players to become Ghost NPCs for remainder of chapter.</p>
+            </div>
+
+            <div class="fix-item">
+                <h4>4. ⏱️ Pacing Fix</h4>
+                <p><strong>Problem:</strong> Original 1-minute timers in Chapter 3 too short for "long story" horror experience.</p>
+                <p><strong>Solution:</strong> Adjusted to 3-minute timers to allow for proper tension building and gameplay.</p>
+            </div>
+
+            <div class="fix-item">
+                <h4>5. 🎬 Scene 3/4 Overlap Fixed</h4>
+                <p><strong>Problem:</strong> Original prompt had confusing overlapping space/police scenes in Chapter 3.</p>
+                <p><strong>Solution:</strong> Separated clearly into:</p>
+                <ul>
+                    <li>Scene 3: Survivor Space Defense (inside spaceship)</li>
+                    <li>Scene 4: Final Capture (Alien Mothership docking)</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Summary Table -->
+        <div class="section">
+            <h2>📊 Quick Reference Summary</h2>
+            <table>
+                <tr>
+                    <th>Aspect</th>
+                    <th>Details</th>
+                </tr>
+                <tr>
+                    <td><strong>Max Players</strong></td>
+                    <td>50 per lobby (with NPC fillers)</td>
+                </tr>
+                <tr>
+                    <td><strong>Chapters</strong></td>
+                    <td>3 (Survivors → Investigation → Climax)</td>
+                </tr>
+                <tr>
+                    <td><strong>Total Scenes</strong></td>
+                    <td>11 unique scenes across all chapters</td>
+                </tr>
+                <tr>
+                    <td><strong>Playable Roles</strong></td>
+                    <td>Survivor, Researcher, Police</td>
+                </tr>
+                <tr>
+                    <td><strong>Network Threshold</strong></td>
+                    <td>P2P ≤10 players | Node.js &gt;10 players</td>
+                </tr>
+                <tr>
+                    <td><strong>Key Mechanics</strong></td>
+                    <td>Grid inventory, Vehicle parenting, Spectator mode</td>
+                </tr>
+            </table>
+        </div>
+
+        <div style="text-align: center; margin-top: 40px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.1);">
+            <p style="color: #a0a0a0; font-style: italic;">Document Version 1.0 | Multiplayer Horror Narrative Game Design</p>
+        </div>
+    </div>
+
+    <script>
+        // Simple interactive elements
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add hover effects to sections
+            const sections = document.querySelectorAll('.section, .chapter');
+            sections.forEach(section => {
+                section.addEventListener('mouseenter', function() {
+                    this.style.transform = 'translateY(-2px)';
+                    this.style.transition = 'transform 0.3s ease';
+                });
+                section.addEventListener('mouseleave', function() {
+                    this.style.transform = 'translateY(0)';
+                });
+            });
+
+            // Smooth scroll for navigation (if needed)
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const target = document.querySelector(this.getAttribute('href'));
+                    if (target) {
+                        target.scrollIntoView({ behavior: 'smooth' });
+                    }
+                });
+            });
+
+            console.log('🎮 Game Design Document loaded successfully!');
+        });
+    </script>
+</body>
+</html>
